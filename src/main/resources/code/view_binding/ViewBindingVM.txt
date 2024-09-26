@@ -1,0 +1,44 @@
+﻿/*
+ *        小猫咪出没，永无BUG！
+ *           /\_/\
+ *          ( o.o )
+ *          > ^ <
+ *         /       \
+ *        |         |
+ *        |         |
+ *        |         |
+ */
+package ^file_path^
+
+
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
+import com.frame.arc.vm.BaseViewModel
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+
+
+
+data class ^class_name^State(val id: Int, val name: String)
+
+
+class ^class_name^ViewModel : BaseViewModel() {
+
+    val m^class_name^IntentChannel = Channel<^class_name^Intent>(Channel.UNLIMITED)
+    val mViewState = MutableSharedFlow<^class_name^State>()
+
+    override fun bindIntent() {
+        launchOnMain {
+            m^class_name^IntentChannel.consumeAsFlow().collect {
+                when (it) {
+                    is ^class_name^Intent.FetchAnyInfo -> {
+                        delay(2000)
+                        mViewState.emit(^class_name^State(1, "110"))
+                    }
+                }
+            }
+        }
+    }
+
+}

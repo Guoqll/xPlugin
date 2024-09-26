@@ -1,0 +1,27 @@
+﻿package &package&
+
+import com.frame.arc.vm.BaseViewModel
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+
+class &SimpleViewModel& : BaseViewModel() {
+
+    val m&SimpleIntent& = Channel<&SimpleIntent&>(Channel.UNLIMITED)
+    val mXDataState = MutableSharedFlow<&SimpleState&>()
+
+    override fun bindIntent() {
+        launch {
+           m&SimpleIntent&.consumeAsFlow().collect {
+               when (it) {
+                    /* simple code
+                    is HomeIntent.GetBannerData -> {
+                         getRepoBannerData()
+                    }*/
+                }
+           }
+        }
+    }
+
+}

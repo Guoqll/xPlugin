@@ -1,0 +1,59 @@
+﻿package &package&
+
+import android.os.Bundle
+import kotlinx.coroutines.flow.collect
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.flow.distinctUntilChanged
+import com.frame.arc.ui.activity.BaseViewDataBindingActivity
+
+
+
+ /**
+     * ----------Dragon be here!----------/
+     * 　　 ┏┓　 ┏┓
+     * 　　┏┛┻━━━┛┻┓━━━
+     * 　　┃　　　　　 ┃
+     * 　　┃　　　━　  ┃
+     * 　　┃　┳┛　┗┳
+     * 　　┃　　　　　 ┃
+     * 　　┃　　　┻　  ┃
+     * 　　┃　　　　   ┃
+     * 　　┗━┓　　　┏━┛Code is far away from bug with the animal protecting
+     * 　　　　┃　　　┃    神兽保佑,代码无bug
+     * 　　　　┃　　　┃
+     * 　　　　┃　　　┗━━━┓
+     * 　　　　┃　　　　　　┣┓
+     * 　　　　┃　　　　　　　┏┛
+     * 　　　　┗┓┓┏━┳┓┏┛━━━━━
+     * 　　　　　┃┫┫　┃┫┫
+     * 　　　　　┗┻┛　┗┻┛
+     * ━━━━━━━━━━━神兽出没━━━━━━━━━━━━━━
+     * @文件名:    &SimpleActivity&
+     * @描述：    TODO: 类描述
+     */
+class &SimpleActivity& : BaseViewDataBindingActivity<&ActivityViewBinding&>(&R.layout.activity_simple&){
+
+    private val mViewModel: &SimpleViewModel& by lazy { getActivityScopeViewModel(&SimpleViewModel&::class.java) }
+
+    override fun onListener() {
+            lifecycleScope.launchWhenCreated {
+                            mViewModel.mXDataState.distinctUntilChanged().collect {
+                                when (it) {
+                                    is &SimpleState&.showLoading -> {}
+                                }
+                            }
+            }
+    }
+
+    override fun onLoadData(savedInstanceState: Bundle?) {
+        with(getViewDataBinding()){
+            presenter = this@&SimpleActivity&
+            vm = mViewModel
+        }
+        doLaunch { mViewModel.m&SimpleIntent&.send(&SimpleIntent&.GetBannerData) }
+    }
+
+
+
+
+}

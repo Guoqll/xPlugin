@@ -1,0 +1,80 @@
+﻿/*
+ * #                                                   #
+ * #                       _oo0oo_                     #
+ * #                      o8888888o                    #
+ * #                      88" . "88                    #
+ * #                      (| -_- |)                    #
+ * #                      0\  =  /0                    #
+ * #                    ___/`---'\___                  #
+ * #                  .' \\|     |# '.                 #
+ * #                 / \\|||  :  |||# \                #
+ * #                / _||||| -:- |||||- \              #
+ * #               |   | \\\  -  #/ |   |              #
+ * #               | \_|  ''\---/''  |_/ |             #
+ * #               \  .-\__  '-'  ___/-. /             #
+ * #             ___'. .'  /--.--\  `. .'___           #
+ * #          ."" '<  `.___\_<|>_/___.' >' "".         #
+ * #         | | :  `- \`.;`\ _ /`;.`/ - ` : | |       #
+ * #         \  \ `_.   \_ __\ /__ _/   .-` /  /       #
+ * #     =====`-.____`.___ \_____/___.-`___.-'=====    #
+ * #                       `=---='                     #
+ * #     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   #
+ * #                                                   #
+ * #               佛祖保佑         永无BUG              #
+ * #                                                   #
+ */
+
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../base/base_state.dart';
+import '../../base/base_state_ful_widget.dart';
+import '&HomePageState&.dart';
+
+class &Home&Page extends BaseStatefulWidget {
+  const &Home&Page({super.key, required this.title});
+
+  final String title;
+
+  @override
+  ConsumerState<&Home&Page> createState() => _&Home&PageView();
+}
+
+///&Home&Page-ui
+class _&Home&PageView extends BaseState<&Home&Page> with &Home&PageState<&Home&Page> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Text(widget.title),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text(
+              'hello ,this is ${widget.title}',
+            ),
+            Consumer(
+              builder: (context, ref, _) {
+                int count = ref.watch(counterProvider);
+                return Text(
+                  '$count',
+                  style: Theme.of(context).textTheme.headlineMedium,
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => {incrementCounter(ref)},
+        tooltip: 'Increment',
+        child: const Icon(Icons.add),
+      ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+}
+
+

@@ -1,0 +1,11 @@
+﻿package &package&
+
+sealed class &SimpleIntent& {
+    object GetBannerData : &SimpleIntent&()
+    /*you can write other intent*/
+}
+
+sealed class &SimpleState& {
+    object showLoading : &SimpleState&()
+    /*you can write other state*/
+}

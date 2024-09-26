@@ -1,0 +1,55 @@
+﻿/*
+ *        小猫咪出没，永无BUG！
+ *           /\_/\
+ *          ( o.o )
+ *          > ^ <
+ *         /       \
+ *        |         |
+ *        |         |
+ *        |         |
+ */
+package ^file_path^
+
+import android.os.Bundle
+import kotlinx.coroutines.launch
+import androidx.lifecycle.Lifecycle
+import kotlinx.coroutines.flow.collect
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import com.frame.arc.basic.BaseFragment
+import kotlinx.coroutines.flow.distinctUntilChanged
+
+sealed class ^class_name^Intent {
+    data class FetchAnyInfo(val id: Int) : ^class_name^Intent()
+}
+
+class ^class_name^Fragment : BaseFragment<^FragmentHomeBinding^>(^FragmentHomeBinding^::inflate) {
+
+    companion object {
+            fun newInstance(args: Bundle? = null): ^class_name^Fragment {
+                return ^class_name^Fragment().apply {
+                    args?.let {
+                        arguments = it
+                    }
+                }
+            }
+    }
+
+    private val mViewModel: ^class_name^ViewModel by lazy { getViewModel(^class_name^ViewModel::class.java) }
+    //private val mActivityViewMode: MainViewModel by lazy { getActivityViewModel(MainViewModel::class.java) }
+    //private val mApplicationViewModel: ShareViewModel by lazy { getApplicationViewModel(ShareViewModel::class.java) }
+
+    override fun initViews() {
+    }
+
+    override fun initData(arguments: Bundle?) {
+        viewLifecycleOwner.lifecycleScope.launch {
+                repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                    mViewModel.mViewState.distinctUntilChanged().collect {
+                        //自定义逻辑
+                    }
+                }
+            }
+    }
+
+}

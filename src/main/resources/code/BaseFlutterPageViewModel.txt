@@ -1,0 +1,49 @@
+﻿/*
+ * #                                                   #
+ * #                       _oo0oo_                     #
+ * #                      o8888888o                    #
+ * #                      88" . "88                    #
+ * #                      (| -_- |)                    #
+ * #                      0\  =  /0                    #
+ * #                    ___/`---'\___                  #
+ * #                  .' \\|     |# '.                 #
+ * #                 / \\|||  :  |||# \                #
+ * #                / _||||| -:- |||||- \              #
+ * #               |   | \\\  -  #/ |   |              #
+ * #               | \_|  ''\---/''  |_/ |             #
+ * #               \  .-\__  '-'  ___/-. /             #
+ * #             ___'. .'  /--.--\  `. .'___           #
+ * #          ."" '<  `.___\_<|>_/___.' >' "".         #
+ * #         | | :  `- \`.;`\ _ /`;.`/ - ` : | |       #
+ * #         \  \ `_.   \_ __\ /__ _/   .-` /  /       #
+ * #     =====`-.____`.___ \_____/___.-`___.-'=====    #
+ * #                       `=---='                     #
+ * #     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   #
+ * #                                                   #
+ * #               佛祖保佑         永无BUG              #
+ * #                                                   #
+ */
+
+ import 'package:flutter/cupertino.dart';
+ import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+///&Home&Page-state-logic
+mixin &Home&PageState<T extends StatefulWidget> on State<T>, WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      ///只有首次绘制完才回调,可以用于加载网络数据
+      final args = ModalRoute.of(context)?.settings.arguments;
+      print('args====${args}');
+    });
+  }
+
+  ///计数器案例
+  final counterProvider = StateProvider.autoDispose((ref) => 0);
+
+  void incrementCounter(WidgetRef ref) {
+    ref.read(counterProvider.notifier).state++;
+  }
+}
+

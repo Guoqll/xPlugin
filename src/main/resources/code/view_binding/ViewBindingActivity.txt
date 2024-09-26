@@ -1,0 +1,43 @@
+﻿/*
+ *        小猫咪出没，永无BUG！
+ *           /\_/\
+ *          ( o.o )
+ *          > ^ <
+ *         /       \
+ *        |         |
+ *        |         |
+ *        |         |
+ */
+package ^file_path^
+
+import android.os.Bundle
+import kotlinx.coroutines.launch
+import androidx.lifecycle.Lifecycle
+import kotlinx.coroutines.flow.collect
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import com.frame.arc.basic.BaseActivity
+import kotlinx.coroutines.flow.distinctUntilChanged
+
+sealed class ^class_name^Intent {
+    data class FetchAnyInfo(val id: Int) : ^class_name^Intent()
+}
+
+class ^class_name^Activity : BaseActivity<^ActivityMainBinding^>(^ActivityMainBinding^::inflate) {
+
+    private val mViewModel: ^class_name^ViewModel by lazy { getViewModel(^class_name^ViewModel::class.java) }
+    //private val mApplicationViewModel: ShareViewModel by lazy { getApplicationViewModel(ShareViewModel::class.java) }
+
+    override fun initViews() {
+    }
+
+    override fun initData(savedInstanceState: Bundle?) {
+        lifecycleScope.launch {
+                repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                    mViewModel.mViewState.distinctUntilChanged().collect {
+                        //自定义逻辑
+                    }
+                }
+        }
+    }
+}

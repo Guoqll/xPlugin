@@ -1,0 +1,60 @@
+<idea-plugin>
+    <id>com.frame.plugin</id>
+    <name>xPlugin</name>
+    <version>1.0.0</version>
+    <vendor email="" url="">Guoql</vendor>
+    <description><![CDATA[one click generation x code]]></description>
+    <change-notes><![CDATA[]]>
+    </change-notes>
+    <idea-version since-build="173.0"/>
+    <depends>com.intellij.modules.platform</depends>
+    <extensions defaultExtensionNs="com.intellij">
+    </extensions>
+    <actions>
+        <group id="com.load.plugin" text="xView" description="new mvvm menu" popup="true"
+               icon="/icons/ic_logo.png">
+            <add-to-group group-id="NewXml" anchor="before" relative-to-action="NewHtmlFile"/>
+
+            <action id="com.load.plugin.vb_activity"
+                    class="com.frame.xplugins.view_binding.ViewBindingActivity"
+                    text="Text _name"
+                    description="Create a new MVVM View Binding Activity"
+                    icon="/icons/ic_logo.png"/>
+
+            <action id="com.load.plugin.vb_fragment"
+                    class="com.frame.xplugins.view_binding.ViewBindingFragment"
+                    text="Text _name"
+                    description="Create a new MVVM View Binding Fragment"
+                    icon="/icons/ic_logo.png"/>
+
+            <!--<action id="com.load.plugin.db_activity"
+                    class="com.frame.plugin.data_binding.ViewDataBindingActivity"
+                    text="Text _name"
+                    description="Create a new MVVM Data Binding Activity"
+                    icon="/icons/ic_logo.png"/>
+
+            <action id="com.load.plugin.db_fragment"
+                    class="com.frame.plugin.data_binding.ViewDataBindingFragment"
+                    text="Text _name"
+                    description="Create a new MVVM Data Binding Fragment"
+                    icon="/icons/ic_logo.png"/>
+
+            <action id="com.compose.mvi.page"
+                    class="com.frame.plugin.compose.ComposePage" text="Text _name"
+                    description="Create a new mvi Compose Activity"
+                    icon="/icons/ic_logo.png"/>
+
+            <action id="com.flutter.mvvm.page"
+                    class="com.frame.plugin.flutter.FlutterPage"
+                    text="Text _name"
+                    description="One click generation of page、state、routing configuration"
+                    icon="/icons/ic_logo.png"/>
+            &lt;!&ndash; Add your actions here &ndash;&gt;
+            <action id="com.frame.plugin.fai.add"
+                    class="com.frame.plugin.flutter.FlutterAddIMG"
+                    text="FlutterAddImage"
+                    description="One click generation of 2x、3x and R configuration"
+                    icon="/icons/ic_logo.png"/>-->
+        </group>
+    </actions>
+</idea-plugin>

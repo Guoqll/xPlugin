@@ -1,0 +1,71 @@
+﻿package &package&
+
+import com.compose.jetbloom.base.BaseViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.consumeAsFlow
+import javax.inject.Inject
+
+/*
+ * #                                                   #
+ * #                       _oo0oo_                     #
+ * #                      o8888888o                    #
+ * #                      88" . "88                    #
+ * #                      (| -_- |)                    #
+ * #                      0\  =  /0                    #
+ * #                    ___/`---'\___                  #
+ * #                  .' \\|     |# '.                 #
+ * #                 / \\|||  :  |||# \                #
+ * #                / _||||| -:- |||||- \              #
+ * #               |   | \\\  -  #/ |   |              #
+ * #               | \_|  ''\---/''  |_/ |             #
+ * #               \  .-\__  '-'  ___/-. /             #
+ * #             ___'. .'  /--.--\  `. .'___           #
+ * #          ."" '<  `.___\_<|>_/___.' >' "".         #
+ * #         | | :  `- \`.;`\ _ /`;.`/ - ` : | |       #
+ * #         \  \ `_.   \_ __\ /__ _/   .-` /  /       #
+ * #     =====`-.____`.___ \_____/___.-`___.-'=====    #
+ * #                       `=---='                     #
+ * #     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   #
+ * #                                                   #
+ * #               佛祖保佑         永无BUG              #
+ * #                                                   #
+ */
+
+
+/*example code*/
+sealed class &Home&Intent {
+    object BannerData : &Home&Intent()
+    data class ArticlesData(val id: Int) : &Home&Intent()
+}
+
+/*example code*/
+@HiltViewModel
+class &Home&ViewModel @Inject constructor(): BaseViewModel() {
+
+    private val m&Home&Intent = Channel<&Home&Intent>(Channel.UNLIMITED)
+    var mRequestState = MutableSharedFlow<Boolean>()
+        private set
+
+    fun sendIntent(intent: &Home&Intent) {
+        launch { m&Home&Intent.send(intent) }
+    }
+
+    override fun bindIntent() {
+        launch {
+            m&Home&Intent.consumeAsFlow().collect {
+                when (it) {
+                    is &Home&Intent.BannerData -> {
+                        requestBannerData()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun requestBannerData() {}
+
+
+}
+

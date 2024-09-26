@@ -1,0 +1,67 @@
+﻿package &package&
+
+import android.os.Bundle
+import kotlinx.coroutines.flow.collect
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.flow.distinctUntilChanged
+import com.frame.arc.ui.fragment.BaseViewDataBindingFragment
+
+
+ /**
+   * ----------Dragon be here!----------/
+   * 　　 ┏┓　 ┏┓
+   * 　　┏┛┻━━━┛┻┓━━━
+   * 　　┃　　　　　 ┃
+   * 　　┃　　　━　  ┃
+   * 　　┃　┳┛　┗┳
+   * 　　┃　　　　　 ┃
+   * 　　┃　　　┻　  ┃
+   * 　　┃　　　　   ┃
+   * 　　┗━┓　　　┏━┛Code is far away from bug with the animal protecting
+   * 　　　　┃　　　┃    神兽保佑,代码无bug
+   * 　　　　┃　　　┃
+   * 　　　　┃　　　┗━━━┓
+   * 　　　　┃　　　　　　┣┓
+   * 　　　　┃　　　　　　　┏┛
+   * 　　　　┗┓┓┏━┳┓┏┛━━━━━
+   * 　　　　　┃┫┫　┃┫┫
+   * 　　　　　┗┻┛　┗┻┛
+   * ━━━━━━━━━━━神兽出没━━━━━━━━━━━━━━
+   * @文件名:    &SimpleFragment&
+   * @描述：    TODO: 类描述
+   */
+class &SimpleFragment& : BaseViewDataBindingFragment<&FragmentViewBinding&>(&R.layout.fragment_simple&){
+
+    companion object {//实例
+        fun newInstance(args: Bundle? = null): &SimpleFragment& {
+            return &SimpleFragment&().apply {args?.let {arguments = it}}
+        }
+    }
+
+    private val mViewModel: &SimpleViewModel& by lazy { getFragmentScopeViewModel(&SimpleViewModel&::class.java) }
+
+    override fun initArgs(bundle: Bundle) {}
+
+    override fun onListener() {
+        lifecycleScope.launchWhenCreated {
+                        mViewModel.mXDataState.distinctUntilChanged().collect {
+                            when (it) {
+                                is &SimpleState&.showLoading -> {}
+                            }
+                        }
+        }
+    }
+
+    override fun onLoadData() {
+        with(getViewDataBinding()){
+            presenter = this@&SimpleFragment&
+            vm = mViewModel
+        }
+        doLaunch { mViewModel.m&SimpleIntent&.send(&SimpleIntent&.GetBannerData) }
+    }
+
+
+
+
+
+}
