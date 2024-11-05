@@ -27,6 +27,12 @@
                     description="Create a new MVVM View Binding Fragment"
                     icon="/icons/ic_logo.png"/>
 
+            <action id="com.load.plugin.vm_page"
+                    class="com.frame.xplugins.flutter.PageByProvider"
+                    text="Text _name"
+                    description="create a new mvvm Page by Provider"
+                    icon="/icons/ic_logo.png"/>
+
             <!--<action id="com.load.plugin.db_activity"
                     class="com.frame.plugin.data_binding.ViewDataBindingActivity"
                     text="Text _name"
