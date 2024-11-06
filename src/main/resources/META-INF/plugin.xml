@@ -15,23 +15,52 @@
                icon="/icons/ic_logo.png">
             <add-to-group group-id="NewXml" anchor="before" relative-to-action="NewHtmlFile"/>
 
-            <action id="com.load.plugin.vb_activity"
-                    class="com.frame.xplugins.view_binding.ViewBindingActivity"
-                    text="Text _name"
-                    description="Create a new MVVM View Binding Activity"
-                    icon="/icons/ic_logo.png"/>
+            <group id="com.load.plugin.android" text="android" popup="true"
+                   description="create xView frame code actions for android"
+                   icon="/icons/ic_logo.png">
 
-            <action id="com.load.plugin.vb_fragment"
-                    class="com.frame.xplugins.view_binding.ViewBindingFragment"
-                    text="Text _name"
-                    description="Create a new MVVM View Binding Fragment"
-                    icon="/icons/ic_logo.png"/>
+                <action id="com.load.plugin.vb_activity"
+                        class="com.frame.xplugins.view_binding.ViewBindingActivity"
+                        text="Text _name"
+                        description="Create a new MVVM View Binding Activity"
+                        icon="/icons/ic_logo.png"/>
 
-            <action id="com.load.plugin.vm_page"
-                    class="com.frame.xplugins.flutter.PageByProvider"
-                    text="Text _name"
-                    description="create a new mvvm Page by Provider"
-                    icon="/icons/ic_logo.png"/>
+                <action id="com.load.plugin.vb_fragment"
+                        class="com.frame.xplugins.view_binding.ViewBindingFragment"
+                        text="Text _name"
+                        description="Create a new MVVM View Binding Fragment"
+                        icon="/icons/ic_logo.png"/>
+            </group>
+
+            <group id="com.load.plugin.flutter" text="flutter" popup="true"
+                   description="create xView frame code actions for android"
+                   icon="/icons/ic_logo.png">
+
+                <action id="com.load.plugin.flutter.provider_page"
+                        class="com.frame.xplugins.flutter.ChangeNotifierPage"
+                        text="Text _name"
+                        description="create a new mvvm Page by Provider"
+                        icon="/icons/ic_logo.png"/>
+
+                <action id="com.load.plugin.flutter.state_page"
+                        class="com.frame.xplugins.flutter.StateNotifierPage"
+                        text="Text _name"
+                        description="create a new mvvm Page by StateNotifier"
+                        icon="/icons/ic_logo.png"/>
+
+                <action id="com.load.plugin.flutter.state_page_consumer"
+                        class="com.frame.xplugins.flutter.StateNotifierConsumerPage"
+                        text="Text _name"
+                        description="create a new mvvm Page by Consumer StateNotifier"
+                        icon="/icons/ic_logo.png"/>
+
+                <action id="com.load.plugin.flutter.http_page_consumer"
+                        class="com.frame.xplugins.flutter.HttpPage"
+                        text="Text _name"
+                        description="create a new mvvm Page of http data by Consumer StateNotifier"
+                        icon="/icons/ic_logo.png"/>
+
+            </group>
 
             <!--<action id="com.load.plugin.db_activity"
                     class="com.frame.plugin.data_binding.ViewDataBindingActivity"

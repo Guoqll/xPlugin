@@ -12,14 +12,13 @@
 import 'package:flutter/cupertino.dart';
 
 class ^Simple^Model {
-  final String name;
   int count;
 
-  ^Simple^Model(this.name, this.count);
+  ^Simple^Model(this.count);
 }
 
-class ^Simple^ViewModel extends ChangeNotifier {
-  ^Simple^Model mData = ^Simple^Model("Guoqll", 110);
+class ^Simple^State extends ChangeNotifier {
+  ^Simple^Model mData = ^Simple^Model(110);
 
   void updateCount() {
     mData.count++;
