@@ -1,12 +1,11 @@
 package com.frame.xplugins.flutter
 
 import java.util.*
-import com.frame.plugin.base.BaseAnAction
 import com.frame.plugin.base.BaseAnActionForFlutter
 
-class PageByProvider : BaseAnActionForFlutter("Flutter Page by Provider") {
+class HttpPage : BaseAnActionForFlutter("Http Page") {
 
-    private val codePath = "/code/flutter"
+    private val codePath = "/code/flutter/http"
 
     override fun generationXcode(
         filePath: String, mainPath: String, packageName: String, className: String, resLimit: String
@@ -20,15 +19,17 @@ class PageByProvider : BaseAnActionForFlutter("Flutter Page by Provider") {
         writeToFile(
             filepath = filePath,
             filename = "${className.lowercase(Locale.getDefault())}_page.dart",
-            content = readFile("$codePath/simple_page.dart")!!
-                .replace("^Simple^", className),
+            content = readFile("$codePath/home_page.dart")!!
+                .replace("^Simple^", className)
+                .replace("^simple^", className.lowercase(Locale.getDefault())),
         )
 
         writeToFile(
             filepath = filePath,
-            filename = "${className.lowercase(Locale.getDefault())}_view_model.dart",
-            content = readFile("$codePath/simple_viewmodel.dart")!!
-                .replace("^Simple^", className),
+            filename = "${className.lowercase(Locale.getDefault())}_state.dart",
+            content = readFile("$codePath/home_state.dart")!!
+                .replace("^Simple^", className)
+                .replace("^simple^", className.lowercase(Locale.getDefault())),
         )
 
     }

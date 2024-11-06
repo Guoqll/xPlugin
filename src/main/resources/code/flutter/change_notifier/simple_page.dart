@@ -22,18 +22,8 @@ class ^Simple^Page extends StatefulWidget {
 }
 
 class _^Simple^PageState extends State<^Simple^Page> {
-  String title = "";
-  final ^Simple^ViewModel mViewModel = ^Simple^ViewModel();
 
-  @override
-  void initState() {
-    super.initState();
-    if (widget.title != null) {
-      title = widget.title!;
-    } else {
-      title = "this is ^Simple^Page";
-    }
-  }
+  final ^Simple^State mViewModel = ^Simple^State();
 
   @override
   Widget build(BuildContext context) {
@@ -41,12 +31,12 @@ class _^Simple^PageState extends State<^Simple^Page> {
         create: (context) => mViewModel,
         child: Scaffold(
             appBar: AppBar(
-              title: Text(title),
+              title: Text(widget.title ?? "^Simple^ Page"),
               backgroundColor: Theme.of(context).colorScheme.inversePrimary,
             ),
-            body: Consumer<^Simple^ViewModel>(builder: (context, model, child) {
+            body: Consumer<^Simple^State>(builder: (context, model, child) {
               return Center(
-                child: Text("$title \ncount is： ${model.mData.count}"),
+                child: Text("this is ^Simple^ Page \ncount is： ${model.mData.count}"),
               );
             }),
             floatingActionButton: FloatingActionButton(
