@@ -272,13 +272,13 @@ class FlutterAddIMG : AnAction("Flutter Add Img") {
         })
     }
 
-    val R_DART_FILE = "r.dart"
+    val R_DART_FILE = "res.dart"
 
     //生成A文件的内容
     fun gen_AContent() {
         a_file = generated!!.findChild(R_DART_FILE)
         val sb = StringBuilder()
-        val s = "class R{\n" +
+        val s = "class Res{\n" +
                 " //auto gen ,do not edit! \n"
         sb.append(s)
         val iterator: Iterator<Map.Entry<String, String>> = list.entries.iterator()
@@ -321,14 +321,54 @@ class FlutterAddIMG : AnAction("Flutter Add Img") {
                 } else {
                     if (ff.path.endsWith("png") or ff.path.endsWith("jpg") or ff.path.endsWith("jpeg")) {
                         val path = ff.path
-                        val path1 = path.substring(path.indexOf("assets"), path.lastIndexOf("."))
-                        val path2 = path1.replace("/".toRegex(), "_")
+                        val path1 = path.substring(path.indexOf("assets"))
+                        var path2 = path1.replace("/".toRegex(), "_")
+                        path2 = convertFilePathToCamelCase(path1)
                         list[path2] = path.substring(path.indexOf("assets"))
                     }
                 }
             }
         }
 
+    }
+
+    fun convertFilePathToCamelCase(filePath: String): String {
+        // 定义固定路径
+        val fixedPath = "assets/images/"
+
+        // 去掉固定路径
+        var trimmedPath = filePath.replace(fixedPath, "")
+
+        // 使用正则表达式检查并保留文件后缀（如png或jpg）
+        val extensionRegex = Regex("\\.(png|jpg)$")
+        val extensionMatch = extensionRegex.find(trimmedPath)
+
+        // 获取文件后缀
+        val fileExtension = extensionMatch?.groups?.get(1)?.value?.capitalize() ?: ""
+
+        // 去掉文件后缀
+        trimmedPath = trimmedPath.replace(extensionRegex, "")
+
+        // 使用下划线分割字符串并转换为驼峰命名法
+        val parts = trimmedPath.split("_")
+        val camelCase = StringBuilder()
+
+        for ((index, part) in parts.withIndex()) {
+            if (index == 0) {
+                // 第一个部分小写
+                camelCase.append(part.toLowerCase())
+            } else {
+                // 其他部分首字母大写
+                camelCase.append(part.capitalize())
+            }
+        }
+
+        // 将文件后缀添加到结果的末尾
+        if (fileExtension.isNotEmpty()) {
+            camelCase.append(fileExtension)
+        }
+
+        return camelCase.toString()
     }
 
 }
