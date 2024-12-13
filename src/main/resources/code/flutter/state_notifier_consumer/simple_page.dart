@@ -23,9 +23,20 @@ class ^Simple^Page extends ConsumerStatefulWidget {
 }
 
 class _^Simple^PageState extends ConsumerState<^Simple^Page> {
+
+  _handlerState(^Simple^Model? previous, ^Simple^Model next) {
+      switch (next.mStateType) {
+          case ^Simple^StateType.defaultState:
+          break;
+          }
+  }
+
   @override
   Widget build(BuildContext context) {
       final ^Simple^Model model = ref.watch(^simple^Provider);
+      ref.listen(^simple^Provider, (previous, next) {
+          _handlerState(previous, next);
+      });
       return Scaffold(
         appBar: AppBar(
           title: Text(widget.title ?? "^Simple^ Page"),
