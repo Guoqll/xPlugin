@@ -29,6 +29,16 @@ class ^Simple^Model {
       count: count ?? this.count,
       mStateType: stateType ?? this.mStateType,
       mStateResult: stateResult ?? mStateResult,
+
+/// 1、data model
+class ^Simple^Model {
+  int count;
+
+  ^Simple^Model({required this.count});
+
+  ^Simple^Model copyWith({int? count}) {
+    return ^Simple^Model(
+      count: count ?? this.count,
     );
   }
 }

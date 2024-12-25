@@ -66,6 +66,7 @@
                     text="FlutterAddImage"
                     description="One click generation of 2x、3x and R configuration"
                     icon="/icons/ic_logo.png"/>
+            </group>
 
             <!--<action id="com.load.plugin.db_activity"
                     class="com.frame.plugin.data_binding.ViewDataBindingActivity"
