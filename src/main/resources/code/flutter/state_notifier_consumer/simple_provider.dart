@@ -18,41 +18,26 @@ enum ^Simple^StateType {
 
 /// 1、data model
 class ^Simple^Model {
-  int count;
+
   ^Simple^StateType mStateType;
   dynamic mStateResult;
 
-  ^Simple^Model({required this.count, required this.mStateType,required this.mStateResult});
+  ^Simple^Model({required this.mStateType, required this.mStateResult});
 
-  ^Simple^Model copyWith({int? count,^Simple^StateType? stateType,dynamic? stateResult}) {
-    return ^Simple^Model(
-      count: count ?? this.count,
-      mStateType: stateType ?? this.mStateType,
-      mStateResult: stateResult ?? mStateResult,
-
-/// 1、data model
-class ^Simple^Model {
-  int count;
-
-  ^Simple^Model({required this.count});
-
-  ^Simple^Model copyWith({int? count}) {
-    return ^Simple^Model(
-      count: count ?? this.count,
+  ^Simple^Model copyWith({^Simple^StateType? stateType, dynamic? stateResult}) {
+  return ^Simple^Model(
+     mStateType: stateType ?? mStateType,
+     mStateResult: stateResult ?? mStateResult,
     );
   }
 }
 
 /// 2、state notifier
 class ^Simple^State extends StateNotifier<^Simple^Model> {
-  ^Simple^State() : super(^Simple^Model(count: 0,mStateType: ^Simple^StateType.defaultState,mStateResult: null));
+  ^Simple^State() : super(^Simple^Model(mStateType: ^Simple^StateType.defaultState,mStateResult: null));
 
-  void increment() {
-    state = state.copyWith(count: state.count + 1);
-  }
-
-  void decrement() {
-    state = state.copyWith(count: state.count - 1);
+  void recycle() {
+    state = state.copyWith(stateType: ^Simple^StateType.defaultState);
   }
 }
 

@@ -24,19 +24,23 @@ class ^Simple^Page extends ConsumerStatefulWidget {
 
 class _^Simple^PageState extends ConsumerState<^Simple^Page> {
 
-  _handlerState(^Simple^Model? previous, ^Simple^Model next) {
-      switch (next.mStateType) {
-          case ^Simple^StateType.defaultState:
-          break;
+    @override
+    initState() {
+        super.initState();
+        WidgetsBinding.instance.endOfFrame.then((value) {
+            _handlerState();
+        });
+    }
+
+  _handlerState() {
+      ref.listen(^simple^Provider, (previous, next) {
+          switch (next.mStateType) {
+              case ^Simple^StateType.defaultState:
+              break;
           }
+      });
   }
 
-  @override
-  Widget build(BuildContext context) {
-      final ^Simple^Model model = ref.watch(^simple^Provider);
-      ref.listen(^simple^Provider, (previous, next) {
-          _handlerState(previous, next);
-      });
   @override
   Widget build(BuildContext context) {
       final ^Simple^Model model = ref.watch(^simple^Provider);
@@ -46,12 +50,13 @@ class _^Simple^PageState extends ConsumerState<^Simple^Page> {
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         ),
         body: Center(
-          child: Text("this is ^Simple^ Page \n count is： ${model.count}"),
-        ),
-        floatingActionButton: FloatingActionButton(
-          child: const Icon(Icons.add),
-          onPressed: () => {ref.read(^simple^Provider.notifier).increment()},
+          child: Text("this is ^Simple^ Page"),
         ),
       );
+  }
+
+  @override
+  void dispose() {
+      super.dispose();
   }
 }

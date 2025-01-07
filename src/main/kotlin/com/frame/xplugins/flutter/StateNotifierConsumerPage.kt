@@ -3,19 +3,13 @@ package com.frame.xplugins.flutter
 import java.util.*
 import com.frame.plugin.base.BaseAnActionForFlutter
 
-class StateNotifierConsumerPage : BaseAnActionForFlutter("Consumer StateNotifier Page") {
+class StateNotifierConsumerPage : BaseAnActionForFlutter("ConsumerPage") {
 
     private val codePath = "/code/flutter/state_notifier_consumer"
 
     override fun generationXcode(
         filePath: String, mainPath: String, packageName: String, className: String, resLimit: String
     ) {
-        /*var resLimitStr = ""
-        var resLimitStr_ = ""
-        if (resLimit.isNotEmpty()) {
-            resLimitStr = resLimit.lowercase(Locale.getDefault())
-            resLimitStr_ = "${resLimit.lowercase(Locale.getDefault())}_"
-        }*/
         writeToFile(
             filepath = filePath,
             filename = "${className.lowercase(Locale.getDefault())}_page.dart",

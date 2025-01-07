@@ -15,6 +15,7 @@
                icon="/icons/ic_logo.png">
             <add-to-group group-id="NewXml" anchor="before" relative-to-action="NewHtmlFile"/>
 
+            <!--android-module-->
             <group id="com.load.plugin.android" text="android" popup="true"
                    description="create xView frame code actions for android"
                    icon="/icons/ic_logo.png">
@@ -31,7 +32,7 @@
                         description="Create a new MVVM View Binding Fragment"
                         icon="/icons/ic_logo.png"/>
             </group>
-
+            <!--flutter_module-->
             <group id="com.load.plugin.flutter" text="flutter" popup="true"
                    description="create xView frame code actions for android"
                    icon="/icons/ic_logo.png">
@@ -60,14 +61,12 @@
                         description="create a new mvvm Page of http data by Consumer StateNotifier"
                         icon="/icons/ic_logo.png"/>
             </group>
-
+            <!--flutter-add-img-->
             <action id="com.frame.plugin.fai.add"
                     class="com.frame.plugin.flutter.FlutterAddIMG"
                     text="FlutterAddImage"
                     description="One click generation of 2x、3x and R configuration"
                     icon="/icons/ic_logo.png"/>
-            </group>
-
             <!--<action id="com.load.plugin.db_activity"
                     class="com.frame.plugin.data_binding.ViewDataBindingActivity"
                     text="Text _name"
