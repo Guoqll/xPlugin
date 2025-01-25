@@ -14,6 +14,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// #、state type
 enum ^Simple^StateType {
   defaultState,
+  requestLoadingState,
+  requestSuccessState,
+  requestFailState,
 }
 
 /// 1、data model

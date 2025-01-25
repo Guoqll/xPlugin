@@ -22,20 +22,18 @@ class ^Simple^Page extends ConsumerStatefulWidget {
   ConsumerState<^Simple^Page> createState() => _^Simple^PageState();
 }
 
-class _^Simple^PageState extends ConsumerState<^Simple^Page> {
-
-    @override
-    initState() {
-        super.initState();
-        WidgetsBinding.instance.endOfFrame.then((value) {
-            _handlerState();
-        });
-    }
+class _^Simple^PageState extends ConsumerState<^Simple^Page> with ^Simple^Controller{
 
   _handlerState() {
       ref.listen(^simple^Provider, (previous, next) {
           switch (next.mStateType) {
               case ^Simple^StateType.defaultState:
+              break;
+              case ^Simple^StateType.requestLoadingState:
+              break;
+              case ^Simple^StateType.requestSuccessState:
+              break;
+              case ^Simple^StateType.requestFailState:
               break;
           }
       });
@@ -44,19 +42,30 @@ class _^Simple^PageState extends ConsumerState<^Simple^Page> {
   @override
   Widget build(BuildContext context) {
       final ^Simple^Model model = ref.watch(^simple^Provider);
+      _handlerState();
       return Scaffold(
         appBar: AppBar(
           title: Text(widget.title ?? "^Simple^ Page"),
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          backgroundColor: Color(0xFFF2F2F3),
         ),
-        body: Center(
-          child: Text("this is ^Simple^ Page"),
-        ),
+        body: _stateContent(model),
       );
   }
 
-  @override
-  void dispose() {
-      super.dispose();
+  Widget _stateContent(^Simple^Model model){
+      return Center(
+          child: switch (model.mStateType) {
+                ^Simple^StateType.requestLoadingState => loadingWidget(),
+                ^Simple^StateType.requestFailState => httpErrorWidget(),
+                ^Simple^StateType.requestSuccessState => _realContentWidget(model.mStateResult),
+                _ => Text("this is ^Simple^ Page"),
+          },
+        );
   }
+
+  Widget _realContentWidget(^Simple^Model  value) {
+      return const Text("this is ^Simple^ Page");
+  }
+
+
 }

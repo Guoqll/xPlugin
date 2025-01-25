@@ -10,12 +10,6 @@ class StateNotifierPage : BaseAnActionForFlutter("StateNotifier Page") {
     override fun generationXcode(
         filePath: String, mainPath: String, packageName: String, className: String, resLimit: String
     ) {
-        /*var resLimitStr = ""
-        var resLimitStr_ = ""
-        if (resLimit.isNotEmpty()) {
-            resLimitStr = resLimit.lowercase(Locale.getDefault())
-            resLimitStr_ = "${resLimit.lowercase(Locale.getDefault())}_"
-        }*/
         writeToFile(
             filepath = filePath,
             filename = "${className.lowercase(Locale.getDefault())}_page.dart",
