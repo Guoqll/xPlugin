@@ -60,6 +60,13 @@
                         text="Text _name"
                         description="create a new mvvm Page of http data by Consumer StateNotifier"
                         icon="/icons/ic_logo.png"/>
+
+                <action id="com.load.plugin.flutter.mvvm"
+                        class="com.frame.xplugins.flutter.ConsumerMvvmPage"
+                        text="Text _name"
+                        description="create a new mvvm Page by Consumer StateNotifier"
+                        icon="/icons/ic_logo.png"/>
+
             </group>
             <!--flutter-add-img-->
             <action id="com.frame.plugin.fai.add"
