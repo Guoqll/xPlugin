@@ -8,7 +8,16 @@ group = "com.frame.plugin"
 version = "1.0.0"
 
 repositories {
+    // 优先使用阿里云镜像（推荐）
+    maven { url = uri("https://maven.aliyun.com/repository/public/") }
+    // 腾讯云镜像（备选）
+    maven { url = uri("https://mirrors.cloud.tencent.com/nexus/repository/maven-public/") }
+    // 华为云镜像（次备选）
+    maven { url = uri("https://repo.huaweicloud.com/repository/maven/") }
+    // 官方仓库（兜底）
     mavenCentral()
+    // IntelliJ 插件专用仓库（如果依赖未同步到镜像）
+    maven { url = uri("https://www.jetbrains.com/intellij-repository/releases") }
 }
 
 // Configure Gradle IntelliJ Plugin
