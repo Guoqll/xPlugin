@@ -1,4 +1,5 @@
-import 'home_state.dart';
+import 'ho_me_state.dart';
+import 'ho_me_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -11,7 +12,7 @@ class HomePage extends ConsumerStatefulWidget {
   ConsumerState<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends ConsumerState<HomePage> {
+class _HomePageState extends ConsumerState<HomePage> with HomeMixin<HomePage>{
   @override
   Widget build(BuildContext context) {
     return Scaffold(

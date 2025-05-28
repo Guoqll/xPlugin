@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import 'home_repository.dart';
+import 'ho_me_repository.dart';
 
-/// home-state
-part 'home_state.freezed.dart';
+/// ho_me-state need run the command: dart run build_runner watch
+part 'ho_me_state.freezed.dart';
 
 @freezed
 class HomeState with _$HomeState {

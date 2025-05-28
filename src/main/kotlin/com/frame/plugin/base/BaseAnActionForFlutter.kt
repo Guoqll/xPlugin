@@ -106,9 +106,31 @@ abstract class BaseAnActionForFlutter(actionText: String) : AnAction(actionText)
         return Pair(firstInputField.text, secondInputField.text)
     }
 
+    // 扩展函数：将驼峰式命名转换为蛇形命名（首字母小写，大写字母前加下划线）
+    private fun String.toSnakeCase(): String {
+        if (isEmpty()) return this
+        val result = StringBuilder()
+        // 首字母直接转小写
+        result.append(this[0].lowercaseChar())
+        for (i in 1 until length) {
+            val currentChar = this[i]
+            if (currentChar.isUpperCase()) {
+                // 大写字母前加下划线并转小写
+                result.append('_').append(currentChar.lowercaseChar())
+            } else {
+                result.append(currentChar)
+            }
+        }
+        return result.toString()
+    }
+
 
     private fun initBaseInfo(selectGroup: VirtualFile?, className: String) {
-        filePath = selectGroup!!.path + "/${className.lowercase(Locale.getDefault())}"
+        // 将驼峰类名转换为蛇形路径（如 NewMain → new_main）
+        val classPathName =
+            className.toSnakeCase()//className.replace(Regex("(?<!^)([A-Z])"), "_$1").lowercase(Locale.getDefault())
+
+        filePath = selectGroup!!.path + "/${className.toSnakeCase()}" //"/${className.lowercase(Locale.getDefault())}"
         packageName = filePath.substring(filePath.indexOf("lib") + 4, filePath.length).replace("/", ".")
         mainPath = filePath.substring(0, filePath.indexOf("lib"))
     }

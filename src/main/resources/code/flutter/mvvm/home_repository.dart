@@ -1,4 +1,3 @@
-import 'package:flutter_example/apis/wan_api.dart';
 
 /// home-repository
 abstract class HomeRepository {
@@ -7,15 +6,15 @@ abstract class HomeRepository {
 
 /// home-repository-impl
 class HomeRepositoryImpl extends HomeRepository {
-  late WanApi _api;
+  late SimpleApi _api;
 
   HomeRepositoryImpl() {
-    _api = WanApi();
+    _api = SimpleApi();
   }
 
   @override
   Future<dynamic> getBannerData() async {
-    Future<dynamic> result = await _api.getBannerList();
+    HttpResult<List<BannerData>> result = await _api.getAreaList();
     return result;
   }
 }
