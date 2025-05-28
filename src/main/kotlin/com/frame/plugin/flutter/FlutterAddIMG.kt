@@ -321,10 +321,12 @@ class FlutterAddIMG : AnAction("Flutter Add Img") {
                 } else {
                     if (ff.path.endsWith("png") or ff.path.endsWith("jpg") or ff.path.endsWith("jpeg")) {
                         val path = ff.path
-                        val path1 = path.substring(path.indexOf("assets"))
-                        var path2 = path1.replace("/".toRegex(), "_")
-                        path2 = convertFilePathToCamelCase(path1)
-                        list[path2] = path.substring(path.indexOf("assets"))
+                        if(path.contains("assets/images/")){
+                            val path1 = path.substring(path.indexOf("assets"))
+                            var path2 = path1.replace("/".toRegex(), "_")
+                            path2 = convertFilePathToCamelCase(path1)
+                            list[path2] = path.substring(path.indexOf("assets"))
+                        }
                     }
                 }
             }
@@ -335,7 +337,6 @@ class FlutterAddIMG : AnAction("Flutter Add Img") {
     fun convertFilePathToCamelCase(filePath: String): String {
         // 定义固定路径
         val fixedPath = "assets/images/"
-
         // 去掉固定路径
         var trimmedPath = filePath.replace(fixedPath, "")
 
