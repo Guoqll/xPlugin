@@ -25,6 +25,13 @@ class ConsumerMvvmPage : BaseAnActionForFlutter("Create Mvvm Code") {
         return result.toString()
     }
 
+    // 扩展函数：将字符串的首字母转为小写
+    fun String.toLowerCaseFirstChar(): String {
+        if (this.isEmpty()) return this
+        return this[0].lowercaseChar() + this.substring(1)
+    }
+// 示例: NewMain → new_main
+
     override fun generationXcode(
         filePath: String, mainPath: String, packageName: String, className: String, resLimit: String
     ) {
@@ -33,7 +40,8 @@ class ConsumerMvvmPage : BaseAnActionForFlutter("Create Mvvm Code") {
             filepath = filePath,
             filename = "${className.toSnakeCase()}_page.dart",
             content = readFile("$codePath/home_page.dart")!!.replace("Home", className)
-                .replace("home", className.lowercase(Locale.getDefault()))
+//                .replace("home", className.lowercase(Locale.getDefault()))
+                .replace("home", className.toLowerCaseFirstChar())
                 .replace("ho_me", className.toSnakeCase()),
         )
         //2、Mixin
@@ -41,7 +49,7 @@ class ConsumerMvvmPage : BaseAnActionForFlutter("Create Mvvm Code") {
             filepath = filePath,
             filename = "${className.toSnakeCase()}_mixin.dart",
             content = readFile("$codePath/home_mixin.dart")!!.replace("Home", className)
-                .replace("home", className.lowercase(Locale.getDefault()))
+                .replace("home", className.toLowerCaseFirstChar())
                 .replace("ho_me", className.toSnakeCase()),
         )
         //3、State
@@ -49,7 +57,7 @@ class ConsumerMvvmPage : BaseAnActionForFlutter("Create Mvvm Code") {
             filepath = filePath,
             filename = "${className.toSnakeCase()}_state.dart",
             content = readFile("$codePath/home_state.dart")!!.replace("Home", className)
-                .replace("home", className.lowercase(Locale.getDefault()))
+                .replace("home", className.toLowerCaseFirstChar())
                 .replace("ho_me", className.toSnakeCase()),
         )
         //4、Repository
@@ -57,7 +65,7 @@ class ConsumerMvvmPage : BaseAnActionForFlutter("Create Mvvm Code") {
             filepath = filePath,
             filename = "${className.toSnakeCase()}_repository.dart",
             content = readFile("$codePath/home_repository.dart")!!.replace("Home", className)
-                .replace("home", className.lowercase(Locale.getDefault()))
+                .replace("home", className.toLowerCaseFirstChar())
                 .replace("ho_me", className.toSnakeCase()),
         )
 
