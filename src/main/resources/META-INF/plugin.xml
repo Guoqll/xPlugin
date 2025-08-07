@@ -74,6 +74,11 @@
                     text="FlutterAddImage"
                     description="One click generation of 2x、3x and R configuration"
                     icon="/icons/ic_logo.png"/>
+            <action id="com.frame.plugin.fai.add_ori"
+                    class="com.frame.plugin.flutter.FlutterAddOriIMG"
+                    text="FlutterAddImage"
+                    description="One click generation of R configuration"
+                    icon="/icons/ic_logo.png"/>
             <!--<action id="com.load.plugin.db_activity"
                     class="com.frame.plugin.data_binding.ViewDataBindingActivity"
                     text="Text _name"
