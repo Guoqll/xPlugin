@@ -67,7 +67,19 @@
                         description="create a new mvvm Page by Consumer StateNotifier"
                         icon="/icons/ic_logo.png"/>
 
+                <action id="com.load.plugin.flutter.mvvm.stless"
+                        class="com.frame.xplugins.flutter.ConsumerWidgetMvvmPage"
+                        text="Text _name"
+                        description="create mvvm ConsumerWidget base @riverpod"
+                        icon="/icons/ic_logo.png"/>
+                <action id="com.load.plugin.flutter.mvvm.stful"
+                        class="com.frame.xplugins.flutter.ConsumerStfulWidgetMvvmPage"
+                        text="Text _name"
+                        description="create mvvm stful base @riverpod"
+                        icon="/icons/ic_logo.png"/>
+
             </group>
+
             <!--flutter-add-img-->
             <action id="com.frame.plugin.fai.add"
                     class="com.frame.plugin.flutter.FlutterAddIMG"
@@ -79,30 +91,6 @@
                     text="FlutterAddImage"
                     description="One click generation of R configuration"
                     icon="/icons/ic_logo.png"/>
-            <!--<action id="com.load.plugin.db_activity"
-                    class="com.frame.plugin.data_binding.ViewDataBindingActivity"
-                    text="Text _name"
-                    description="Create a new MVVM Data Binding Activity"
-                    icon="/icons/ic_logo.png"/>
-
-            <action id="com.load.plugin.db_fragment"
-                    class="com.frame.plugin.data_binding.ViewDataBindingFragment"
-                    text="Text _name"
-                    description="Create a new MVVM Data Binding Fragment"
-                    icon="/icons/ic_logo.png"/>
-
-            <action id="com.compose.mvi.page"
-                    class="com.frame.plugin.compose.ComposePage" text="Text _name"
-                    description="Create a new mvi Compose Activity"
-                    icon="/icons/ic_logo.png"/>
-
-            <action id="com.flutter.mvvm.page"
-                    class="com.frame.plugin.flutter.FlutterPage"
-                    text="Text _name"
-                    description="One click generation of page、state、routing configuration"
-                    icon="/icons/ic_logo.png"/>
-            &lt;!&ndash; Add your actions here &ndash;&gt;
-            -->
         </group>
     </actions>
 </idea-plugin>
