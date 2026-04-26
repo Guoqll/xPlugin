@@ -1,11 +1,13 @@
 plugins {
     id("java")
-    id("org.jetbrains.kotlin.jvm") version "1.7.20"
-    id("org.jetbrains.intellij") version "1.13.1"
+    id("org.jetbrains.kotlin.jvm") version "1.9.23"
+    id("org.jetbrains.intellij") version "1.17.3"
 }
 
 group = "com.frame.plugin"
-version = "1.0.0"
+// 允许通过命令行参数传入版本号，如果没有传入，则默认使用 "1.0.1"
+// 使用方式: ./gradlew buildPlugin -PpluginVersion=1.0.2
+version = project.findProperty("pluginVersion") ?: "1.0.1"
 
 repositories {
     // 优先使用阿里云镜像（推荐）
@@ -23,7 +25,8 @@ repositories {
 // Configure Gradle IntelliJ Plugin
 // Read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
 intellij {
-    version.set("2022.2.4")
+    // 尝试使用大版本号，避免具体的小版本下载链接失效引发 NPE
+    version.set("2024.1")
     type.set("IC") // Target IDE Platform
 
     plugins.set(listOf(/* Plugin Dependencies */))
@@ -32,16 +35,16 @@ intellij {
 tasks {
     // Set the JVM compatibility versions
     withType<JavaCompile> {
-        sourceCompatibility = "11"
-        targetCompatibility = "11"
+        sourceCompatibility = "17"
+        targetCompatibility = "17"
     }
     withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-        kotlinOptions.jvmTarget = "11"
+        kotlinOptions.jvmTarget = "17"
     }
 
     patchPluginXml {
-        sinceBuild.set("222")
-        untilBuild.set("243.*")
+        sinceBuild.set("241")
+        untilBuild.set("253.*")
     }
 
     signPlugin {
@@ -52,5 +55,20 @@ tasks {
 
     publishPlugin {
         token.set(System.getenv("PUBLISH_TOKEN"))
+    }
+
+    buildPlugin {
+        doLast {
+            // 获取当前用户的 Downloads 目录 (Mac: ~/Downloads)
+            val downloadsDir = file(System.getProperty("user.home") + "/Downloads")
+            
+            // 将生成的产物（.jar 或 .zip）复制到 Downloads 目录
+            copy {
+                from(archiveFile)
+                into(downloadsDir)
+            }
+            
+            println("======> 打包成功！插件已复制到: ${downloadsDir.absolutePath}/${archiveFile.get().asFile.name}")
+        }
     }
 }

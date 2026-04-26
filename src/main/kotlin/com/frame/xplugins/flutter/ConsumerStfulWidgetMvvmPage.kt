@@ -8,64 +8,59 @@ class ConsumerStfulWidgetMvvmPage : BaseAnActionForFlutter("stful@riverpod") {
 
     // 扩展函数：将驼峰式命名转换为蛇形命名（首字母小写，大写字母前加下划线）
     private fun String.toSnakeCase(): String {
-        if (isEmpty()) return this
-        val result = StringBuilder()
-        // 首字母直接转小写
-        result.append(this[0].lowercaseChar())
-        for (i in 1 until length) {
-            val currentChar = this[i]
-            if (currentChar.isUpperCase()) {
-                // 大写字母前加下划线并转小写
-                result.append('_').append(currentChar.lowercaseChar())
-            } else {
-                result.append(currentChar)
-            }
-        }
-        return result.toString()
+        val regex = "([a-z])([A-Z]+)".toRegex()
+        return this.replace(regex, "$1_$2").lowercase()
     }
-
-    // 扩展函数：将字符串的首字母转为小写
-    fun String.toLowerCaseFirstChar(): String {
-        if (this.isEmpty()) return this
-        return this[0].lowercaseChar() + this.substring(1)
-    }
-// 示例: NewMain → new_main
 
     override fun generationXcode(
         filePath: String, mainPath: String, packageName: String, className: String, resLimit: String
     ) {
-        //1、Page
+        val snakeClassName = className.toSnakeCase()
+        // 使用 Kotlin 标准库的方法将首字母转小写
+        val lowerCamelClassName = className.replaceFirstChar { it.lowercase() }
+
+        // 统一提取模板替换逻辑，避免代码重复，并保证替换顺序的正确性
+        fun String.replaceTemplatePlaceholders(): String {
+            return this
+                // 1. 优先替换所有的特定文件名后缀，防止后续被 "example" 的变量替换破坏
+                .replace("example_state.g.dart", "${snakeClassName}_state.g.dart")
+                .replace("example_state.freezed.dart", "${snakeClassName}_state.freezed.dart")
+                .replace("example_view_model.g.dart", "${snakeClassName}_view_model.g.dart")
+                .replace("example_state.dart", "${snakeClassName}_state.dart")
+                .replace("example_view_model.dart", "${snakeClassName}_view_model.dart")
+                // 2. 替换类名
+                .replace("Example", className)
+                // 3. 替换变量名
+                .replace("example", lowerCamelClassName)
+        }
+
+        // 读取模板内容的辅助函数，增加空安全检查，避免抛出 NPE
+        fun readTemplate(fileName: String): String {
+            val fullPath = "$codePath/$fileName"
+            return requireNotNull(readFile(fullPath)) { 
+                "Template file not found in plugin resources: $fullPath" 
+            }
+        }
+
+        // 1、Page
         writeToFile(
             filepath = filePath,
-            filename = "${className.toSnakeCase()}_page.dart",
-            content = readFile("$codePath/example_stful_page.dart")!!
-                .replace("Example", className)
-                .replace("example", className.toLowerCaseFirstChar())
-                .replace("${className.toLowerCaseFirstChar()}_state.dart", "${className.toSnakeCase()}_state.dart")
-                .replace("${className.toLowerCaseFirstChar()}_view_model.dart", "${className.toSnakeCase()}_view_model.dart"),
-        )
-        //2、viewModel
-        writeToFile(
-            filepath = filePath,
-            filename = "${className.toSnakeCase()}_view_model.dart",
-            content = readFile("$codePath/example_view_model.dart")!!
-                .replace("Example", className)
-//                .replace("example", className.toLowerCaseFirstChar())
-                .replace("example_state.dart", "${className.toSnakeCase()}_state.dart")
-                .replace("example_view_model.dart", "${className.toSnakeCase()}_view_model.dart")
-                .replace("example_view_model.g.dart", "${className.toSnakeCase()}_view_model.g.dart"),
-        )
-        //3、State
-        writeToFile(
-            filepath = filePath,
-            filename = "${className.toSnakeCase()}_state.dart",
-            content = readFile("$codePath/example_state.dart")!!
-                .replace("Example", className)
-                .replace("example_state.g.dart", "${className.toSnakeCase()}_state.g.dart")
-                .replace("example_state.freezed.dart", "${className.toSnakeCase()}_state.freezed.dart"),
+            filename = "${snakeClassName}_page.dart",
+            content = readTemplate("example_stful_page.dart").replaceTemplatePlaceholders()
         )
 
+        // 2、viewModel
+        writeToFile(
+            filepath = filePath,
+            filename = "${snakeClassName}_view_model.dart",
+            content = readTemplate("example_view_model.dart").replaceTemplatePlaceholders()
+        )
+
+        // 3、State
+        writeToFile(
+            filepath = filePath,
+            filename = "${snakeClassName}_state.dart",
+            content = readTemplate("example_state.dart").replaceTemplatePlaceholders()
+        )
     }
-
-
 }

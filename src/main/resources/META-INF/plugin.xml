@@ -12,71 +12,77 @@
     </extensions>
     <actions>
         <group id="com.load.plugin" text="xView" description="new mvvm menu" popup="true"
-               icon="/icons/ic_logo.png">
+               icon="/icons/x.svg">
             <add-to-group group-id="NewXml" anchor="before" relative-to-action="NewHtmlFile"/>
 
             <!--android-module-->
             <group id="com.load.plugin.android" text="android" popup="true"
                    description="create xView frame code actions for android"
-                   icon="/icons/ic_logo.png">
+                   icon="/icons/android.svg">
 
                 <action id="com.load.plugin.vb_activity"
                         class="com.frame.xplugins.view_binding.ViewBindingActivity"
                         text="Text _name"
                         description="Create a new MVVM View Binding Activity"
-                        icon="/icons/ic_logo.png"/>
+                        icon="/icons/android.svg"/>
 
                 <action id="com.load.plugin.vb_fragment"
                         class="com.frame.xplugins.view_binding.ViewBindingFragment"
                         text="Text _name"
                         description="Create a new MVVM View Binding Fragment"
-                        icon="/icons/ic_logo.png"/>
+                        icon="/icons/android.svg"/>
             </group>
             <!--flutter_module-->
             <group id="com.load.plugin.flutter" text="flutter" popup="true"
                    description="create xView frame code actions for android"
-                   icon="/icons/ic_logo.png">
+                   icon="/icons/flutter.svg">
 
-                <action id="com.load.plugin.flutter.provider_page"
+                <!--<action id="com.load.plugin.flutter.provider_page"
                         class="com.frame.xplugins.flutter.ChangeNotifierPage"
                         text="Text _name"
                         description="create a new mvvm Page by Provider"
-                        icon="/icons/ic_logo.png"/>
+                        icon="/icons/flutter.svg"/>
 
                 <action id="com.load.plugin.flutter.state_page"
                         class="com.frame.xplugins.flutter.StateNotifierPage"
                         text="Text _name"
                         description="create a new mvvm Page by StateNotifier"
-                        icon="/icons/ic_logo.png"/>
+                        icon="/icons/flutter.svg"/>
 
                 <action id="com.load.plugin.flutter.state_page_consumer"
                         class="com.frame.xplugins.flutter.StateNotifierConsumerPage"
                         text="Text _name"
                         description="create a new mvvm Page by Consumer StateNotifier"
-                        icon="/icons/ic_logo.png"/>
+                        icon="/icons/flutter.svg"/>
 
                 <action id="com.load.plugin.flutter.http_page_consumer"
                         class="com.frame.xplugins.flutter.HttpPage"
                         text="Text _name"
                         description="create a new mvvm Page of http data by Consumer StateNotifier"
-                        icon="/icons/ic_logo.png"/>
+                        icon="/icons/flutter.svg"/>
 
                 <action id="com.load.plugin.flutter.mvvm"
                         class="com.frame.xplugins.flutter.ConsumerMvvmPage"
                         text="Text _name"
                         description="create a new mvvm Page by Consumer StateNotifier"
-                        icon="/icons/ic_logo.png"/>
+                        icon="/icons/flutter.svg"/>
 
                 <action id="com.load.plugin.flutter.mvvm.stless"
                         class="com.frame.xplugins.flutter.ConsumerWidgetMvvmPage"
                         text="Text _name"
                         description="create mvvm ConsumerWidget base @riverpod"
-                        icon="/icons/ic_logo.png"/>
+                        icon="/icons/flutter.svg"/>
                 <action id="com.load.plugin.flutter.mvvm.stful"
                         class="com.frame.xplugins.flutter.ConsumerStfulWidgetMvvmPage"
                         text="Text _name"
                         description="create mvvm stful base @riverpod"
-                        icon="/icons/ic_logo.png"/>
+                        icon="/icons/flutter.svg"/>-->
+
+                <action id="com.load.plugin.flutter.mvvm.stful3"
+                        class="com.frame.xplugins.flutter.Consumer3StfulWidgetMvvmPage"
+                        text="Text _name"
+                        description="create mvvm stful base @riverpod3"
+                        icon="/icons/flutter.svg"/>
 
             </group>
 
@@ -85,12 +91,12 @@
                     class="com.frame.plugin.flutter.FlutterAddIMG"
                     text="FlutterAddImage"
                     description="One click generation of 2x、3x and R configuration"
-                    icon="/icons/ic_logo.png"/>
+                    icon="/icons/image.svg"/>
             <action id="com.frame.plugin.fai.add_ori"
                     class="com.frame.plugin.flutter.FlutterAddOriIMG"
                     text="FlutterAddImage"
                     description="One click generation of R configuration"
-                    icon="/icons/ic_logo.png"/>
+                    icon="/icons/image.svg"/>
         </group>
     </actions>
 </idea-plugin>
