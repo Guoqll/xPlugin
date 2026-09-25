@@ -8,6 +8,7 @@
     </change-notes>
     <idea-version since-build="173.0"/>
     <depends>com.intellij.modules.platform</depends>
+    <depends optional="true">Dart</depends>
     <extensions defaultExtensionNs="com.intellij">
     </extensions>
     <actions>
@@ -82,6 +83,12 @@
                         class="com.frame.xplugins.flutter.Consumer3StfulWidgetMvvmPage"
                         text="Text _name"
                         description="create mvvm stful base @riverpod3"
+                        icon="/icons/flutter.svg"/>
+
+                <action id="com.frame.xplugins.getx.route"
+                        class="com.frame.xplugins.getx.action.GetXRouteAction"
+                        text="GetX Route"
+                        description="Create a GetX route page, controller, repository, and binding"
                         icon="/icons/flutter.svg"/>
 
             </group>

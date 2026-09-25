@@ -7,7 +7,7 @@ plugins {
 group = "com.frame.plugin"
 // 允许通过命令行参数传入版本号，如果没有传入，则默认使用 "1.0.1"
 // 使用方式: ./gradlew buildPlugin -PpluginVersion=1.0.2
-version = project.findProperty("pluginVersion") ?: "1.0.1"
+version = project.findProperty("pluginVersion") ?: "1.0.2"
 
 repositories {
     // 优先使用阿里云镜像（推荐）
@@ -29,7 +29,13 @@ intellij {
     version.set("2024.1")
     type.set("IC") // Target IDE Platform
 
-    plugins.set(listOf(/* Plugin Dependencies */))
+    // Dart PSI is used by the optional GetX route generator. This version is
+    // compatible with the 2024.1 (241) IntelliJ platform used by this project.
+    plugins.set(listOf("Dart:241.15845"))
+}
+
+dependencies {
+    testImplementation("junit:junit:4.13.2")
 }
 
 tasks {
