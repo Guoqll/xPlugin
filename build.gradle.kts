@@ -7,7 +7,7 @@ plugins {
 group = "com.frame.plugin"
 // 允许通过命令行参数传入版本号，如果没有传入，则默认使用 "1.0.1"
 // 使用方式: ./gradlew buildPlugin -PpluginVersion=1.0.2
-version = project.findProperty("pluginVersion") ?: "1.0.2"
+version = project.findProperty("pluginVersion") ?: "1.0.3"
 
 repositories {
     // 优先使用阿里云镜像（推荐）
@@ -50,7 +50,7 @@ tasks {
 
     patchPluginXml {
         sinceBuild.set("241")
-        untilBuild.set("253.*")
+        untilBuild.set("262.*")
     }
 
     signPlugin {
