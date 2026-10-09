@@ -7,7 +7,7 @@ class GetXProjectScannerTest : BasePlatformTestCase() {
 
     fun testScansDartClassesInsteadOfFileNames() {
         myFixture.addFileToProject(
-            "lib/features/course/not_named_like_controller.dart",
+            "lib/features/course/controller/course_controller.dart",
             """
                 import 'package:get/get.dart';
                 import '../../repositories/tk_course_repository.dart';
@@ -20,9 +20,10 @@ class GetXProjectScannerTest : BasePlatformTestCase() {
                 class LooksLikeAController {}
             """.trimIndent(),
         )
+        myFixture.addFileToProject("lib/features/course/controller/fake_controller.dart", "class NotAController {}")
         myFixture.addFileToProject(
-            "lib/features/course/fake_controller.dart",
-            "class NotAController {}",
+            "lib/features/other/controller/other_controller.dart",
+            "class OtherController extends GetxController {}",
         )
         myFixture.addFileToProject(
             "lib/repositories/tk_course_repository.dart",
@@ -41,11 +42,13 @@ class GetXProjectScannerTest : BasePlatformTestCase() {
         )
 
         val lib = myFixture.tempDirFixture.findOrCreateDir("lib")
-        val result = GetXProjectScanner(project).scan(lib)
+        val course = myFixture.tempDirFixture.findOrCreateDir("lib/features/course")
+        val result = GetXProjectScanner(project).scan(lib, course)
 
         assertEquals(listOf("CourseController", "CourseDetailController"), result.controllers.map { it.className })
         assertEquals(listOf("CourseRepository"), result.repositories.map { it.className })
         assertEquals(listOf("lib/bindings/tk_course_binding.dart"), result.bindings.map { it.relativePath })
+        assertFalse("Controllers outside the selected business directory must not be candidates", result.controllers.any { it.className == "OtherController" })
         assertEquals(emptyList<String>(), result.controllers.first().unnamedConstructorParameters)
         assertEquals(
             listOf("CourseRepository"),
@@ -57,6 +60,10 @@ class GetXProjectScannerTest : BasePlatformTestCase() {
         myFixture.addFileToProject(
             "example/lib/main.dart",
             "Widget build(BuildContext context) => MaterialApp(home: const SizedBox());",
+        )
+        myFixture.addFileToProject(
+            "example/lib/example_controller.dart",
+            "class ExampleController extends GetxController {}",
         )
         myFixture.addFileToProject(
             "lib/utils/route_util.dart",
@@ -107,6 +114,7 @@ class GetXProjectScannerTest : BasePlatformTestCase() {
         assertEquals(RouteDiMode.NAVIGATOR_PAGE_SCOPE, result.navigationEvidence.recommendedMode)
         assertTrue(result.navigationEvidence.hasMaterialApp)
         assertTrue(result.navigationEvidence.hasNavigatorRoutes)
+        assertTrue("Classes outside the target lib must not be candidates", result.controllers.isEmpty())
         val mixin = requireNotNull(result.pageControllerMixin)
         assertEquals("lib/core/mixins/page_controller_mixin.dart", mixin.relativePath)
         assertTrue(mixin.compatibilityErrors.joinToString(), mixin.isCompatible)
@@ -189,5 +197,23 @@ class GetXProjectScannerTest : BasePlatformTestCase() {
         assertFalse(mixin.isCompatible)
         assertTrue(mixin.compatibilityErrors.any { "protected getter" in it })
         assertTrue(mixin.compatibilityErrors.any { "Get.isRegistered" in it })
+    }
+
+    fun testNavigationEvidenceStillIgnoresCommentsAndStrings() {
+        myFixture.addFileToProject(
+            "example/lib/main.dart",
+            """
+                // GetMaterialApp(home: HomePage())
+                const fakeRoute = 'Get.toNamed(/course)';
+                final interpolatedRoute = '${'$'}{Get.toNamed(routeName)}';
+            """.trimIndent(),
+        )
+        myFixture.addFileToProject("lib/main.dart", "void main() {}")
+
+        val lib = myFixture.tempDirFixture.findOrCreateDir("lib")
+        val evidence = GetXProjectScanner(project).scan(lib).navigationEvidence
+
+        assertFalse(evidence.hasGetMaterialApp)
+        assertFalse(evidence.hasGetXRoutes)
     }
 }

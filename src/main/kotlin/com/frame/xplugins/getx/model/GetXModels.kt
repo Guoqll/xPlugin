@@ -81,7 +81,6 @@ data class GetXScanResult(
     val repositories: List<DartClassCandidate> = emptyList(),
     val bindings: List<BindingFileCandidate> = emptyList(),
     val pageControllerMixin: PageControllerMixinCandidate? = null,
-    val allClassNames: Set<String> = emptySet(),
     val navigationEvidence: NavigationEvidence = NavigationEvidence(),
 )
 

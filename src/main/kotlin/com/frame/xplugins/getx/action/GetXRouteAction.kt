@@ -12,6 +12,7 @@ import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.actionSystem.LangDataKeys
 import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiDirectory
@@ -31,28 +32,44 @@ class GetXRouteAction : AnAction("GetX Route") {
             Messages.showErrorDialog(project, "Select the lib directory or one of its subdirectories.", "GetX Route")
             return
         }
-        var scan: GetXScanResult? = null
-        ProgressManager.getInstance().runProcessWithProgressSynchronously(
-            {
-                scan = ReadAction.compute<GetXScanResult, RuntimeException> {
-                    GetXProjectScanner(project).scan(pathContext.libDirectory)
-                }
-            },
-            "Scanning Dart classes",
-            true,
+        val scan = scanDartClasses(
             project,
-        )
-        val dialog = GetXRouteDialog(project, pathContext, scan ?: return)
+            pathContext.libDirectory,
+            pathContext.parentDirectory,
+            "Scanning required GetX files",
+        ) ?: return
+        val dialog = GetXRouteDialog(project, pathContext, scan)
         if (!dialog.showAndGet()) return
 
+        val config = dialog.resultConfig()
         try {
-            GetXRouteExecutor(project).execute(dialog.resultConfig())
+            GetXRouteExecutor(project).execute(config, scan)
             Messages.showInfoMessage(project, "GetX route created successfully.", "GetX Route")
         } catch (error: GetXGenerationException) {
             Messages.showErrorDialog(project, error.message ?: "GetX route generation failed.", "GetX Route")
         } catch (error: Exception) {
             Messages.showErrorDialog(project, error.message ?: error.javaClass.simpleName, "GetX Route")
         }
+    }
+
+    private fun scanDartClasses(
+        project: Project,
+        libDirectory: VirtualFile,
+        controllerSearchDirectory: VirtualFile,
+        title: String,
+    ): GetXScanResult? {
+        var result: GetXScanResult? = null
+        ProgressManager.getInstance().runProcessWithProgressSynchronously(
+            {
+                result = ReadAction.compute<GetXScanResult, RuntimeException> {
+                    GetXProjectScanner(project).scan(libDirectory, controllerSearchDirectory)
+                }
+            },
+            title,
+            true,
+            project,
+        )
+        return result
     }
 
     private fun selectedDirectory(e: AnActionEvent): VirtualFile? {

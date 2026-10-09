@@ -2,6 +2,7 @@ package com.frame.xplugins.getx.validation
 
 import com.frame.xplugins.getx.model.BindingMode
 import com.frame.xplugins.getx.model.ControllerMode
+import com.frame.xplugins.getx.model.DartClassCandidate
 import com.frame.xplugins.getx.model.GetXGenerationException
 import com.frame.xplugins.getx.model.GetXScanResult
 import com.frame.xplugins.getx.model.PageCapability
@@ -9,9 +10,11 @@ import com.frame.xplugins.getx.model.PageType
 import com.frame.xplugins.getx.model.RepositoryMode
 import com.frame.xplugins.getx.model.RouteDiMode
 import com.frame.xplugins.getx.model.RouteGenerateConfig
+import com.frame.xplugins.getx.scanner.GetXProjectScanner
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 
-class GetXRouteValidator {
+class GetXRouteValidator(private val project: Project) {
 
     fun validate(config: RouteGenerateConfig, scan: GetXScanResult) {
         val errors = mutableListOf<String>()
@@ -88,12 +91,6 @@ class GetXRouteValidator {
         }
         val assemblesController = config.routeDiMode == RouteDiMode.NAVIGATOR_PAGE_SCOPE ||
             config.bindingMode != BindingMode.NONE
-        if (assemblesController && config.controllerMode == ControllerMode.EXISTING) {
-            validateExistingControllerConstructor(config, errors)
-        }
-        if (assemblesController && config.repositoryMode == RepositoryMode.EXISTING) {
-            validateExistingRepositoryConstructor(config, errors)
-        }
 
         val targetDirectory = config.parentDirectory.findChild(config.routeName)
         checkFileConflict(targetDirectory, config.pageFileName, errors)
@@ -120,15 +117,37 @@ class GetXRouteValidator {
                 add("PageControllerMixin")
             }
         }
-        generatedClasses.filter { it in scan.allClassNames }.forEach { errors += "Class $it already exists." }
+        val classScanner = GetXProjectScanner(project)
+        generatedClasses.filter { className -> classScanner.containsClassName(className, config.libDirectory) }
+            .forEach { errors += "Class $it already exists." }
+        val refreshedController = config.existingController?.let(classScanner::refreshCandidate)
+        val refreshedRepository = config.existingRepository?.let(classScanner::refreshCandidate)
+        if (config.existingController != null && refreshedController == null) {
+            errors += "${config.existingController.className} is no longer available. Rescan the project and try again."
+        }
+        if (config.existingRepository != null && refreshedRepository == null) {
+            errors += "${config.existingRepository.className} is no longer available. Rescan the project and try again."
+        }
+        if (assemblesController && config.controllerMode == ControllerMode.EXISTING && refreshedController != null) {
+            validateExistingControllerConstructor(config, refreshedController, errors)
+        }
+        if (assemblesController && config.repositoryMode == RepositoryMode.EXISTING && refreshedRepository != null) {
+            validateExistingRepositoryConstructor(refreshedRepository, errors)
+        }
+        config.existingBinding?.let { binding ->
+            if (!binding.file.isValid) errors += "${binding.relativePath} is no longer available. Rescan the project and try again."
+        }
         if (config.existingBinding?.bindingClassNames?.contains(config.bindingClassName) == true) {
             errors += "Class ${config.bindingClassName} already exists in ${config.existingBinding.relativePath}."
         }
         if (errors.isNotEmpty()) throw GetXGenerationException(errors.distinct().joinToString("\n"))
     }
 
-    private fun validateExistingControllerConstructor(config: RouteGenerateConfig, errors: MutableList<String>) {
-        val candidate = config.existingController ?: return
+    private fun validateExistingControllerConstructor(
+        config: RouteGenerateConfig,
+        candidate: DartClassCandidate,
+        errors: MutableList<String>,
+    ) {
         val parameters = candidate.unnamedConstructorParameters
         if (parameters == null) {
             errors += "${candidate.className} has no unnamed constructor that the binding can call."
@@ -148,8 +167,10 @@ class GetXRouteValidator {
         }
     }
 
-    private fun validateExistingRepositoryConstructor(config: RouteGenerateConfig, errors: MutableList<String>) {
-        val candidate = config.existingRepository ?: return
+    private fun validateExistingRepositoryConstructor(
+        candidate: DartClassCandidate,
+        errors: MutableList<String>,
+    ) {
         val parameters = candidate.unnamedConstructorParameters
         if (parameters == null) {
             errors += "${candidate.className} has no unnamed constructor that dependency assembly can call."
@@ -171,7 +192,7 @@ class GetXRouteValidator {
     ) {
         val mixinFile = config.libDirectory.fileSystem.findFileByPath(config.pageControllerMixinPath) ?: return
         if (mixinFile.isDirectory) return
-        val candidate = scan.pageControllerMixin
+        val candidate = scan.pageControllerMixin?.let(GetXProjectScanner(project)::refreshPageControllerMixin)
         if (candidate == null || candidate.file != mixinFile) {
             errors += "page_controller_mixin.dart exists but PageControllerMixin cannot be safely identified."
         } else if (!candidate.isCompatible) {

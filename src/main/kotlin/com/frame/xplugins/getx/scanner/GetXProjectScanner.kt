@@ -6,33 +6,35 @@ import com.frame.xplugins.getx.model.DartConstructorParameter
 import com.frame.xplugins.getx.model.GetXScanResult
 import com.frame.xplugins.getx.model.NavigationEvidence
 import com.frame.xplugins.getx.model.PageControllerMixinCandidate
+import com.intellij.util.indexing.FileBasedIndex
+import com.jetbrains.lang.dart.ide.index.DartClassIndex
+import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiManager
-import com.intellij.psi.PsiComment
-import com.intellij.psi.PsiElement
 import com.intellij.psi.SmartPointerManager
-import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.psi.search.GlobalSearchScopesCore
 import com.intellij.psi.util.PsiTreeUtil
+import com.jetbrains.lang.dart.DartTokenTypes
+import com.jetbrains.lang.dart.DartTokenTypesSets
 import com.jetbrains.lang.dart.DartFileType
+import com.jetbrains.lang.dart.lexer.DartLexer
 import com.jetbrains.lang.dart.psi.DartClass
 import com.jetbrains.lang.dart.psi.DartFormalParameterList
 import com.jetbrains.lang.dart.psi.DartMixinDeclaration
 import com.jetbrains.lang.dart.psi.DartNormalFormalParameter
 import com.jetbrains.lang.dart.psi.DartOptionalFormalParameters
-import com.jetbrains.lang.dart.psi.DartStringLiteralExpression
 import com.jetbrains.lang.dart.psi.DartType
 
 class GetXProjectScanner(private val project: Project) {
 
-    fun scan(libDirectory: VirtualFile): GetXScanResult {
+    fun scan(libDirectory: VirtualFile, controllerSearchDirectory: VirtualFile = libDirectory): GetXScanResult {
         val controllerCandidates = mutableListOf<DartClassCandidate>()
         val repositoryCandidates = mutableListOf<DartClassCandidate>()
         val bindingFiles = mutableListOf<BindingFileCandidate>()
         var pageControllerMixin: PageControllerMixinCandidate? = null
-        val allClassNames = mutableSetOf<String>()
         var hasMaterialApp = false
         var hasNavigatorRoutes = false
         var hasGetMaterialApp = false
@@ -44,71 +46,85 @@ class GetXProjectScanner(private val project: Project) {
         val pageControllerMixinFile = libDirectory.findFileByRelativePath(
             "core/mixins/page_controller_mixin.dart",
         )
-
-        FileTypeIndex.getFiles(DartFileType.INSTANCE, GlobalSearchScope.projectScope(project))
-            .asSequence()
-            .sortedBy(VirtualFile::getPath)
-            .forEach fileLoop@{ file ->
-                val dartFile = psiManager.findFile(file) ?: return@fileLoop
-                val sourceCode = codeWithoutCommentsAndStrings(dartFile)
-                if (MATERIAL_APP_CALL.containsMatchIn(sourceCode)) hasMaterialApp = true
-                if (NAVIGATOR_ROUTE_CALL.containsMatchIn(sourceCode)) hasNavigatorRoutes = true
-                if (GET_MATERIAL_APP_CALL.containsMatchIn(sourceCode)) hasGetMaterialApp = true
-                if (GETX_ROUTE_CALL.containsMatchIn(sourceCode)) hasGetXRoutes = true
-                if (!VfsUtilCore.isAncestor(libDirectory, file, false)) return@fileLoop
-                val classes = PsiTreeUtil.findChildrenOfType(dartFile, DartClass::class.java)
-                val bindingClassNames = mutableSetOf<String>()
-                classes.forEach classLoop@{ dartClass ->
-                    val className = dartClass.name ?: return@classLoop
-                    allClassNames += className
-                    val superType = dartClass.superClass?.text.orEmpty()
-                    val candidate = DartClassCandidate(
-                        className = className,
-                        file = file,
-                        relativePath = VfsUtilCore.getRelativePath(file, libDirectory.parent, '/') ?: file.path,
-                        pointer = smartPointers.createSmartPsiElementPointer(dartClass),
-                        unnamedConstructorParameters = unnamedConstructorParameters(dartClass),
-                    )
-                    if (superType.substringBefore('<').substringAfterLast('.').trim() == "GetxController") {
-                        controllerCandidates += candidate
-                    }
-                    if (repositoryDirectory != null && VfsUtilCore.isAncestor(repositoryDirectory, file, false) &&
-                        className.endsWith("Repository")
-                    ) {
-                        repositoryCandidates += candidate
-                    }
-                    if (superType.substringBefore('<').substringAfterLast('.').trim() == "Bindings") {
-                        bindingClassNames += className
-                    }
-                    if (file == pageControllerMixinFile &&
-                        className == PAGE_CONTROLLER_MIXIN &&
-                        dartClass is DartMixinDeclaration
-                    ) {
-                        pageControllerMixin = PageControllerMixinCandidate(
-                            file = file,
-                            relativePath = VfsUtilCore.getRelativePath(file, libDirectory.parent, '/') ?: file.path,
-                            pointer = smartPointers.createSmartPsiElementPointer(dartClass),
-                            compatibilityErrors = pageControllerMixinErrors(dartClass),
-                        )
-                    }
+        val flutterRoot = libDirectory.parent ?: libDirectory
+        val controllerRoots = buildSet {
+            if (controllerSearchDirectory.isDirectory) add(controllerSearchDirectory)
+            libDirectory.findChild("controllers")?.takeIf(VirtualFile::isDirectory)?.let(::add)
+        }
+        dartFiles(controllerRoots).filter(::isControllerFile).forEach { file ->
+            ProgressManager.checkCanceled()
+            val dartFile = psiManager.findFile(file) ?: return@forEach
+            PsiTreeUtil.getChildrenOfTypeAsList(dartFile, DartClass::class.java).forEach classLoop@{ dartClass ->
+                if (dartClass.name == null) return@classLoop
+                val superType = dartClass.superClass?.text.orEmpty()
+                if (superType.substringBefore('<').substringAfterLast('.').trim() != "GetxController") {
+                    return@classLoop
                 }
-                if (bindingDirectory != null && VfsUtilCore.isAncestor(bindingDirectory, file, false) &&
-                    bindingClassNames.isNotEmpty()
-                ) {
+                controllerCandidates += candidate(dartClass, file, libDirectory, smartPointers)
+            }
+        }
+
+        if (repositoryDirectory?.isDirectory == true) {
+            dartFiles(setOf(repositoryDirectory)).forEach { file ->
+                ProgressManager.checkCanceled()
+                val dartFile = psiManager.findFile(file) ?: return@forEach
+                PsiTreeUtil.getChildrenOfTypeAsList(dartFile, DartClass::class.java)
+                    .filter { it.name?.endsWith("Repository") == true }
+                    .forEach { repositoryCandidates += candidate(it, file, libDirectory, smartPointers) }
+            }
+        }
+
+        if (bindingDirectory?.isDirectory == true) {
+            dartFiles(setOf(bindingDirectory)).forEach { file ->
+                ProgressManager.checkCanceled()
+                val dartFile = psiManager.findFile(file) ?: return@forEach
+                val bindingClassNames = PsiTreeUtil.getChildrenOfTypeAsList(dartFile, DartClass::class.java)
+                    .filter {
+                        it.superClass?.text.orEmpty().substringBefore('<').substringAfterLast('.').trim() == "Bindings"
+                    }
+                    .mapNotNull(DartClass::getName)
+                    .toSet()
+                if (bindingClassNames.isNotEmpty()) {
                     bindingFiles += BindingFileCandidate(
                         file = file,
-                        relativePath = VfsUtilCore.getRelativePath(file, libDirectory.parent, '/') ?: file.path,
+                        relativePath = relativePath(file, libDirectory),
                         bindingClassNames = bindingClassNames,
                     )
                 }
             }
+        }
+
+        if (pageControllerMixinFile?.isValid == true && !pageControllerMixinFile.isDirectory) {
+            val dartFile = psiManager.findFile(pageControllerMixinFile)
+            PsiTreeUtil.getChildrenOfTypeAsList(dartFile, DartClass::class.java)
+                .filterIsInstance<DartMixinDeclaration>()
+                .firstOrNull { it.name == PAGE_CONTROLLER_MIXIN }
+                ?.let { mixin ->
+                    pageControllerMixin = PageControllerMixinCandidate(
+                        file = pageControllerMixinFile,
+                        relativePath = relativePath(pageControllerMixinFile, libDirectory),
+                        pointer = smartPointers.createSmartPsiElementPointer(mixin),
+                        compatibilityErrors = pageControllerMixinErrors(mixin),
+                    )
+                }
+        }
+
+        navigationFiles(libDirectory, flutterRoot).forEach { file ->
+            ProgressManager.checkCanceled()
+            val rawSource = VfsUtilCore.loadText(file)
+            if (NAVIGATION_HINTS.none(rawSource::contains)) return@forEach
+            val sourceCode = codeWithoutCommentsAndStrings(rawSource)
+            if (MATERIAL_APP_CALL.containsMatchIn(sourceCode)) hasMaterialApp = true
+            if (NAVIGATOR_ROUTE_CALL.containsMatchIn(sourceCode)) hasNavigatorRoutes = true
+            if (GET_MATERIAL_APP_CALL.containsMatchIn(sourceCode)) hasGetMaterialApp = true
+            if (GETX_ROUTE_CALL.containsMatchIn(sourceCode)) hasGetXRoutes = true
+        }
 
         return GetXScanResult(
             controllers = controllerCandidates.sortedWith(compareBy(DartClassCandidate::className, DartClassCandidate::relativePath)),
             repositories = repositoryCandidates.sortedWith(compareBy(DartClassCandidate::className, DartClassCandidate::relativePath)),
             bindings = bindingFiles.sortedBy(BindingFileCandidate::relativePath),
             pageControllerMixin = pageControllerMixin,
-            allClassNames = allClassNames,
             navigationEvidence = NavigationEvidence(
                 hasMaterialApp = hasMaterialApp,
                 hasNavigatorRoutes = hasNavigatorRoutes,
@@ -116,6 +132,91 @@ class GetXProjectScanner(private val project: Project) {
                 hasGetXRoutes = hasGetXRoutes,
             ),
         )
+    }
+
+    fun containsClassName(className: String, libDirectory: VirtualFile): Boolean {
+        val scope: GlobalSearchScope = GlobalSearchScopesCore.directoryScope(project, libDirectory, true)
+        return FileBasedIndex.getInstance().getContainingFiles(
+            DartClassIndex.DART_CLASS_INDEX,
+            className,
+            scope,
+        ).isNotEmpty()
+    }
+
+    fun refreshCandidate(candidate: DartClassCandidate): DartClassCandidate? {
+        if (!candidate.file.isValid) return null
+        val dartClass = candidate.pointer.element?.takeIf { it.isValid && it.name == candidate.className } ?: return null
+        return candidate.copy(unnamedConstructorParameters = unnamedConstructorParameters(dartClass))
+    }
+
+    fun refreshPageControllerMixin(candidate: PageControllerMixinCandidate): PageControllerMixinCandidate? {
+        if (!candidate.file.isValid) return null
+        val mixin = candidate.pointer.element?.takeIf { it.isValid && it.name == PAGE_CONTROLLER_MIXIN }
+            ?: return null
+        return candidate.copy(compatibilityErrors = pageControllerMixinErrors(mixin))
+    }
+
+    private fun candidate(
+        dartClass: DartClass,
+        file: VirtualFile,
+        libDirectory: VirtualFile,
+        smartPointers: SmartPointerManager,
+    ) = DartClassCandidate(
+        className = requireNotNull(dartClass.name),
+        file = file,
+        relativePath = relativePath(file, libDirectory),
+        pointer = smartPointers.createSmartPsiElementPointer(dartClass),
+        unnamedConstructorParameters = unnamedConstructorParameters(dartClass),
+    )
+
+    private fun relativePath(file: VirtualFile, libDirectory: VirtualFile): String =
+        VfsUtilCore.getRelativePath(file, libDirectory.parent, '/') ?: file.path
+
+    private fun isControllerFile(file: VirtualFile): Boolean =
+        file.nameWithoutExtension.endsWith("controller", ignoreCase = true)
+
+    private fun dartFiles(roots: Set<VirtualFile>): List<VirtualFile> = buildList {
+        val visited = mutableSetOf<String>()
+        val visitedDirectories = mutableSetOf<String>()
+        fun visit(directory: VirtualFile) {
+            if (!visitedDirectories.add(directory.path)) return
+            ProgressManager.checkCanceled()
+            directory.children.forEach { child ->
+                if (child.isDirectory) visit(child)
+                else if (child.extension.equals("dart", ignoreCase = true) && visited.add(child.path)) add(child)
+            }
+        }
+        roots.forEach(::visit)
+    }.sortedBy(VirtualFile::getPath)
+
+    private fun navigationFiles(libDirectory: VirtualFile, flutterRoot: VirtualFile): List<VirtualFile> {
+        val files = linkedSetOf<VirtualFile>()
+        listOf("main.dart", "app.dart").forEach { name ->
+            libDirectory.findChild(name)?.takeIf { !it.isDirectory }?.let(files::add)
+            flutterRoot.findFileByRelativePath("example/lib/$name")?.takeIf { !it.isDirectory }?.let(files::add)
+        }
+        libDirectory.children
+            .filter { !it.isDirectory && it.extension.equals("dart", ignoreCase = true) }
+            .filter { file ->
+                val name = file.nameWithoutExtension.lowercase()
+                listOf("route", "router", "navigation").any(name::contains)
+            }
+            .forEach(files::add)
+        val navigationRoots = listOf("routes", "router", "navigation", "config", "utils")
+            .mapNotNull(libDirectory::findChild)
+            .filter(VirtualFile::isDirectory)
+            .toSet()
+        dartFiles(navigationRoots)
+            .filter { file ->
+                val name = file.nameWithoutExtension.lowercase()
+                listOf("route", "router", "navigation").any(name::contains) ||
+                    navigationRoots.any { root ->
+                        root.name in setOf("routes", "router", "navigation") &&
+                            VfsUtilCore.isAncestor(root, file, false)
+                    }
+            }
+            .forEach(files::add)
+        return files.sortedBy(VirtualFile::getPath)
     }
 
     private fun unnamedConstructorParameters(dartClass: DartClass): List<DartConstructorParameter>? {
@@ -150,17 +251,24 @@ class GetXProjectScanner(private val project: Project) {
             }
     }
 
-    private fun codeWithoutCommentsAndStrings(root: PsiElement): String {
-        val result = StringBuilder(root.text)
-        val ignoredRanges = buildList {
-            addAll(PsiTreeUtil.findChildrenOfType(root, PsiComment::class.java).map(PsiElement::getTextRange))
-            addAll(
-                PsiTreeUtil.findChildrenOfType(root, DartStringLiteralExpression::class.java)
-                    .map(PsiElement::getTextRange),
-            )
-        }
-        ignoredRanges.sortedByDescending { it.startOffset }.forEach { range ->
-            result.replace(range.startOffset, range.endOffset, " ".repeat(range.length))
+    private fun codeWithoutCommentsAndStrings(source: String): String {
+        val result = StringBuilder(source)
+        val lexer = DartLexer()
+        var stringDepth = 0
+        lexer.start(source)
+        while (lexer.tokenType != null) {
+            val tokenType = lexer.tokenType
+            if (tokenType == DartTokenTypes.OPEN_QUOTE) stringDepth++
+            val shouldMask = stringDepth > 0 ||
+                DartTokenTypesSets.COMMENTS.contains(tokenType) ||
+                DartTokenTypesSets.STRINGS.contains(tokenType)
+            if (shouldMask) {
+                for (index in lexer.tokenStart until lexer.tokenEnd) {
+                    if (result[index] != '\n' && result[index] != '\r') result.setCharAt(index, ' ')
+                }
+            }
+            if (tokenType == DartTokenTypes.CLOSING_QUOTE && stringDepth > 0) stringDepth--
+            lexer.advance()
         }
         return result.toString()
     }
@@ -278,6 +386,7 @@ class GetXProjectScanner(private val project: Project) {
         )
         val GET_MATERIAL_APP_CALL = Regex("\\bGetMaterialApp\\s*\\(")
         val GETX_ROUTE_CALL = Regex("\\bGetPage\\s*\\(|\\bGet\\.(?:to|toNamed|off|offNamed)\\s*\\(")
+        val NAVIGATION_HINTS = listOf("MaterialApp", "Navigator", "PageRoute", "GetPage", "Get.to", "Get.off")
         const val PAGE_CONTROLLER_MIXIN = "PageControllerMixin"
     }
 }
