@@ -40,18 +40,43 @@ class GetXRouteGenerationServiceTest : BasePlatformTestCase() {
         assertTrue(preview.contains("ROUTE / DI MODE\n  Navigator + Page Scope"))
         assertTrue(preview.contains("CREATE COMMON INFRASTRUCTURE"))
         assertTrue(preview.contains("lib/core/mixins/page_controller_mixin.dart"))
+        assertTrue(preview.contains("lib/features/course_detail/tk_course_detail_actions_mixin.dart"))
+        assertTrue(preview.contains("+ imports and composes CourseDetailActionsMixin<CourseDetailPage>"))
         assertFalse(preview.contains("DependencyScope"))
         assertFalse(preview.contains("_scope.dart"))
         assertFalse(preview.contains("tk_course_detail_binding.dart"))
     }
 
+    fun testPreviewDerivesActionsMixinForUnmappedRoute() {
+        val preview = GetXRouteGenerationService().plan(
+            config(
+                PageCapability.BASIC,
+                RouteDiMode.NAVIGATOR_PAGE_SCOPE,
+                routeNameInput = "checkout_flow",
+            ),
+        ).render()
+
+        assertTrue(preview.contains("lib/features/checkout_flow/tk_checkout_flow_actions_mixin.dart"))
+        assertTrue(preview.contains("+ imports and composes CheckoutFlowActionsMixin<CheckoutFlowPage>"))
+    }
+
+    fun testGetViewPreviewDoesNotAddStateActionsMixin() {
+        val preview = GetXRouteGenerationService().plan(
+            config(PageCapability.BASIC, routeNameInput = "answer_report_of_shua_ti"),
+        ).render()
+
+        assertFalse(preview.contains("ActionsMixin"))
+        assertFalse(preview.contains("actions_mixin.dart"))
+    }
+
     private fun config(
         capability: PageCapability,
         routeDiMode: RouteDiMode = RouteDiMode.GETX_ROUTE_BINDING,
+        routeNameInput: String = "course_detail",
     ): RouteGenerateConfig {
         val lib = myFixture.tempDirFixture.findOrCreateDir("lib")
         val parent = myFixture.tempDirFixture.findOrCreateDir("lib/features")
-        val route = DartNamingConverter.routeName("course_detail")
+        val route = DartNamingConverter.routeName(routeNameInput)
         return RouteGenerateConfig(
             parentDirectory = parent,
             libDirectory = lib,

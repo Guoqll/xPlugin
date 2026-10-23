@@ -56,6 +56,9 @@ class GetXRouteWriter(
         if (config.controllerMode == ControllerMode.CREATE) {
             createdFiles += createDartFile(targetDirectory, config.controllerFileName, generator.controller(config))
         }
+        config.businessMixinFileName?.let { fileName ->
+            createdFiles += createDartFile(targetDirectory, fileName, generator.businessMixin(config))
+        }
         if (config.createWidgetsDirectory && targetDirectory.findSubdirectory("widgets") == null) {
             targetDirectory.createSubdirectory("widgets")
         }

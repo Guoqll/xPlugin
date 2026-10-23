@@ -12,9 +12,19 @@ class GetXRouteGenerationService {
 
     fun plan(config: RouteGenerateConfig): RouteGenerationPlan {
         val create = buildList {
-            add(displayPath(config, "${config.targetPath}/${config.pageFileName}"))
+            val pageEntry = buildString {
+                append(displayPath(config, "${config.targetPath}/${config.pageFileName}"))
+                config.businessMixinSpec?.let { mixin ->
+                    appendLine()
+                    append("    + imports and composes ${mixin.mixinClassName}<${config.pageClassName}>")
+                }
+            }
+            add(pageEntry)
             if (config.controllerMode == ControllerMode.CREATE) {
                 add(displayPath(config, "${config.targetPath}/${config.controllerFileName}"))
+            }
+            config.businessMixinFileName?.let { fileName ->
+                add(displayPath(config, "${config.targetPath}/$fileName"))
             }
             if (config.createWidgetsDirectory) add(displayPath(config, "${config.targetPath}/widgets/"))
             if (config.repositoryMode == RepositoryMode.CREATE) {

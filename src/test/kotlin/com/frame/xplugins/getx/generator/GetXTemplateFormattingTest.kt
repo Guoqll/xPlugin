@@ -19,6 +19,7 @@ class GetXTemplateFormattingTest {
         "controller/without_repository.dart.tpl",
         "page/data_state_get_view.dart.tpl",
         "page/get_view.dart.tpl",
+        "mixin/actions_mixin.dart.tpl",
         "page/navigator_basic_with_controller.dart.tpl",
         "page/navigator_data_state.dart.tpl",
         "page/stateless.dart.tpl",

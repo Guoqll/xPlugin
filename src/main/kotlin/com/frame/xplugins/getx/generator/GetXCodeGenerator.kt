@@ -33,6 +33,8 @@ class GetXCodeGenerator(private val templates: GetXTemplateLoader = GetXTemplate
                 "PAGE_CLASS" to config.pageClassName,
                 "CONTROLLER_CLASS" to config.controllerClassName,
                 "CONTROLLER_IMPORT" to controllerImportForPage(config),
+                "BUSINESS_MIXIN_IMPORT" to businessMixinImport(config),
+                "BUSINESS_MIXIN_DECLARATION" to businessMixinDeclaration(config),
             ),
         )
     }
@@ -65,6 +67,19 @@ class GetXCodeGenerator(private val templates: GetXTemplateLoader = GetXTemplate
     fun pageStateWidgets(): String = render(templates.load("common/page_state_widgets.dart.tpl"), emptyMap())
 
     fun pageControllerMixin(): String = render(templates.load("common/page_controller_mixin.dart.tpl"), emptyMap())
+
+    fun businessMixin(config: RouteGenerateConfig): String {
+        val mixin = requireNotNull(config.businessMixinSpec)
+        return render(
+            templates.load(mixin.templatePath),
+            mapOf(
+                "ACTIONS_MIXIN_CLASS" to mixin.mixinClassName,
+                "CONTROLLER_CLASS" to mixin.controllerClassName,
+                "CONTROLLER_IMPORT" to controllerImportForPage(config),
+                "PAGE_CLASS" to config.pageClassName,
+            ),
+        )
+    }
 
     fun bindingFile(config: RouteGenerateConfig): String {
         val imports = bindingImports(config).joinToString("\n") { "import '$it';" }
@@ -172,6 +187,7 @@ class GetXCodeGenerator(private val templates: GetXTemplateLoader = GetXTemplate
                 "CONTROLLER_CLASS" to config.controllerClassName,
                 "CONTROLLER_CREATION_BODY" to navigatorControllerCreationBody(config),
                 "CONTENT_BODY" to dataStateContentBody(config),
+                "BUSINESS_MIXIN_COMPOSITION" to businessMixinComposition(config),
             ),
         )
     }
@@ -188,7 +204,17 @@ class GetXCodeGenerator(private val templates: GetXTemplateLoader = GetXTemplate
         }
         add(controllerImportForPage(config))
         repositoryPath(config)?.let { add(FlutterProjectPathResolver.relativeImport(config.targetPath, it)) }
+        config.businessMixinFileName?.let(::add)
     }.distinct().joinToString("\n") { "import '$it';" }
+
+    private fun businessMixinImport(config: RouteGenerateConfig): String =
+        config.businessMixinFileName?.let { "import '$it';\n\n" }.orEmpty()
+
+    private fun businessMixinDeclaration(config: RouteGenerateConfig): String =
+        config.businessMixinSpec?.let { "\n    with ${it.mixinClassName}<${config.pageClassName}>" }.orEmpty()
+
+    private fun businessMixinComposition(config: RouteGenerateConfig): String =
+        config.businessMixinSpec?.let { ",\n        ${it.mixinClassName}<${config.pageClassName}>" }.orEmpty()
 
     private fun navigatorControllerCreationBody(config: RouteGenerateConfig): String {
         val repository = config.repositoryClassName?.let { repositoryExpression(config) }

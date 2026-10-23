@@ -124,6 +124,14 @@ data class RouteGenerateConfig(
     val pageStateMixinPath: String = "${libDirectory.path}/core/mixins/page_state_mixin.dart"
     val pageStateWidgetsPath: String = "${libDirectory.path}/core/widgets/page_state/page_state_widgets.dart"
     val pageControllerMixinPath: String = "${libDirectory.path}/core/mixins/page_controller_mixin.dart"
+    val businessMixinSpec: RouteBusinessMixinSpec?
+        get() = RouteBusinessMixinFactory.forPage(
+            routeClassName = routeClassName,
+            controllerClassName = controllerClassName,
+            pageType = pageType,
+            controllerMode = controllerMode,
+        )
+    val businessMixinFileName: String? get() = businessMixinSpec?.let { "$fileStem${it.fileSuffix}" }
     val repositoryRegistrationMethodName: String? = repositoryClassName?.let { "_register$it" }
 }
 

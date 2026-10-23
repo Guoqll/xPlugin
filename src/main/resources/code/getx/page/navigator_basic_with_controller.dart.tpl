@@ -9,7 +9,7 @@ class {{PAGE_CLASS}} extends StatefulWidget {
 }
 
 class _{{PAGE_CLASS}}State extends State<{{PAGE_CLASS}}>
-    with PageControllerMixin<{{PAGE_CLASS}}, {{CONTROLLER_CLASS}}> {
+    with PageControllerMixin<{{PAGE_CLASS}}, {{CONTROLLER_CLASS}}>{{BUSINESS_MIXIN_COMPOSITION}} {
   @override
   {{CONTROLLER_CLASS}} createController() {
 {{CONTROLLER_CREATION_BODY}}

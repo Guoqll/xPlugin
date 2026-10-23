@@ -19,6 +19,99 @@ import com.intellij.testFramework.fixtures.BasePlatformTestCase
 
 class GetXRouteWriterTest : BasePlatformTestCase() {
 
+    fun testCreatesDynamicallyNamedActionsMixinAndKeepsPageControllerMixin() {
+        val lib = myFixture.tempDirFixture.findOrCreateDir("lib")
+        val parent = myFixture.tempDirFixture.findOrCreateDir("lib/pages/courses")
+        val config = courseDetailConfig(parent, lib)
+
+        GetXRouteExecutor(project).execute(config)
+
+        val target = requireNotNull(parent.findChild("course_detail"))
+        val page = VfsUtilCore.loadText(requireNotNull(target.findChild("tk_course_detail_page.dart")))
+        val actionsMixin = VfsUtilCore.loadText(
+            requireNotNull(target.findChild("tk_course_detail_actions_mixin.dart")),
+        )
+        val controllerMixin = VfsUtilCore.loadText(
+            requireNotNull(lib.findFileByRelativePath("core/mixins/page_controller_mixin.dart")),
+        )
+
+        assertTrue(page.contains("import 'tk_course_detail_actions_mixin.dart';"))
+        assertTrue(page.contains("with PageControllerMixin<CourseDetailPage, CourseDetailController>"))
+        assertTrue(page.contains("CourseDetailActionsMixin<CourseDetailPage>"))
+        assertTrue(actionsMixin.contains("mixin CourseDetailActionsMixin<W extends StatefulWidget> on State<W>"))
+        assertTrue(actionsMixin.contains("CourseDetailController get controller;"))
+        assertTrue(actionsMixin.contains("TODO: Add this route's click handlers, navigation, and Controller actions."))
+        assertTrue(controllerMixin.contains("C get controller => _controller;"))
+        assertTrue(requireNotNull(GetXProjectScanner(project).scan(lib).pageControllerMixin).isCompatible)
+    }
+
+    fun testExistingActionsMixinFileIsNotOverwritten() {
+        val lib = myFixture.tempDirFixture.findOrCreateDir("lib")
+        val parent = myFixture.tempDirFixture.findOrCreateDir("lib/pages/courses")
+        val existing = myFixture.addFileToProject(
+            "lib/pages/courses/course_detail/tk_course_detail_actions_mixin.dart",
+            "// Keep the user's existing Mixin.\n",
+        ).virtualFile
+
+        try {
+            GetXRouteExecutor(project).execute(courseDetailConfig(parent, lib))
+            fail("Expected an existing business Mixin conflict")
+        } catch (expected: GetXGenerationException) {
+            assertTrue(expected.message.orEmpty().contains("tk_course_detail_actions_mixin.dart already exists"))
+        }
+
+        assertEquals("// Keep the user's existing Mixin.\n", VfsUtilCore.loadText(existing))
+        assertNull(parent.findChild("course_detail")?.findChild("tk_course_detail_page.dart"))
+    }
+
+    fun testActionMixinControllerGetterUsesExistingControllerType() {
+        val lib = myFixture.tempDirFixture.findOrCreateDir("lib")
+        val parent = myFixture.tempDirFixture.findOrCreateDir("lib/pages/courses")
+        myFixture.addFileToProject(
+            "lib/shared/course_controller.dart",
+            "import 'package:get/get.dart';\nclass CourseController extends GetxController {}",
+        )
+        val candidate = GetXProjectScanner(project).scan(lib).controllers.single()
+        val config = courseDetailConfig(parent, lib).copy(
+            controllerMode = ControllerMode.EXISTING,
+            existingController = candidate,
+        )
+
+        GetXRouteExecutor(project).execute(config)
+
+        val target = requireNotNull(parent.findChild("course_detail"))
+        val actionsMixin = VfsUtilCore.loadText(
+            requireNotNull(target.findChild("tk_course_detail_actions_mixin.dart")),
+        )
+        assertTrue(actionsMixin.contains("CourseController get controller;"))
+        assertFalse(actionsMixin.contains("CourseDetailController get controller;"))
+    }
+
+    private fun courseDetailConfig(
+        parent: com.intellij.openapi.vfs.VirtualFile,
+        lib: com.intellij.openapi.vfs.VirtualFile,
+    ): RouteGenerateConfig {
+        val route = DartNamingConverter.routeName("course_detail")
+        return RouteGenerateConfig(
+            parentDirectory = parent,
+            libDirectory = lib,
+            routeName = route.snakeCase,
+            routeClassName = route.pascalCase,
+            prefix = "tk",
+            businessDomain = "course_detail",
+            pageType = PageType.STATEFUL,
+            controllerMode = ControllerMode.CREATE,
+            existingController = null,
+            repositoryMode = RepositoryMode.NONE,
+            existingRepository = null,
+            bindingMode = BindingMode.NONE,
+            existingBinding = null,
+            createWidgetsDirectory = false,
+            pageCapability = PageCapability.BASIC,
+            routeDiMode = RouteDiMode.NAVIGATOR_PAGE_SCOPE,
+        )
+    }
+
     fun testCreatesNavigatorDataStateMixinAndSupportsSingleUndo() {
         val lib = myFixture.tempDirFixture.findOrCreateDir("lib")
         val report = myFixture.tempDirFixture.findOrCreateDir("lib/pages/report")

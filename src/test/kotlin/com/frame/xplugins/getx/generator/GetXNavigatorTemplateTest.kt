@@ -49,6 +49,70 @@ class GetXNavigatorTemplateTest : BasePlatformTestCase() {
         assertFalse(page.contains("PageStateView"))
         assertFalse(page.contains("PageRefreshView"))
         assertFalse(page.contains("Obx("))
+        assertTrue(page.contains("CourseActionsMixin<CoursePage>"))
+    }
+
+    fun testActionsMixinIsDerivedFromTheGeneratedPageClassAndController() {
+        val config = navigatorConfig(
+            PageCapability.BASIC,
+            RepositoryMode.NONE,
+        ).copy(
+            routeName = "unmapped_route",
+            routeClassName = "CourseDetail",
+        )
+        val generator = GetXCodeGenerator()
+
+        val page = generator.page(config)
+        val mixin = generator.businessMixin(config)
+
+        assertEquals("tk_unmapped_route_actions_mixin.dart", config.businessMixinFileName)
+        assertTrue(page.contains("import 'tk_unmapped_route_actions_mixin.dart';"))
+        assertTrue(page.contains("with PageControllerMixin<CourseDetailPage, CourseDetailController>"))
+        assertTrue(page.contains("CourseDetailActionsMixin<CourseDetailPage>"))
+        assertTrue(mixin.contains("mixin CourseDetailActionsMixin<W extends StatefulWidget> on State<W>"))
+        assertTrue(mixin.contains("CourseDetailController get controller;"))
+        assertFalse(mixin.contains("GetxController get controller;"))
+        assertTrue(mixin.contains("TODO: Add this route's click handlers, navigation, and Controller actions."))
+        assertFalse(mixin.contains("AnswerReportOfShuaTi"))
+    }
+
+    fun testAnswerReportUsesTheSameDynamicActionsMixinTemplate() {
+        val config = navigatorConfig(PageCapability.BASIC, RepositoryMode.NONE).copy(
+            routeName = "answer_report_of_shua_ti",
+            routeClassName = "AnswerReportOfShuaTi",
+        )
+
+        val mixin = GetXCodeGenerator().businessMixin(config)
+
+        assertEquals("tk_answer_report_of_shua_ti_actions_mixin.dart", config.businessMixinFileName)
+        assertTrue(mixin.contains("mixin AnswerReportOfShuaTiActionsMixin<W extends StatefulWidget> on State<W>"))
+        assertTrue(mixin.contains("AnswerReportOfShuaTiController get controller;"))
+        assertFalse(mixin.contains("onNextGroupTap"))
+    }
+
+    fun testStatefulPageWithoutControllerDoesNotGenerateActionsMixin() {
+        val config = navigatorConfig(PageCapability.BASIC, RepositoryMode.NONE).copy(
+            controllerMode = ControllerMode.NONE,
+        )
+
+        assertNull(config.businessMixinFileName)
+        assertFalse(GetXCodeGenerator().page(config).contains("ActionsMixin"))
+    }
+
+    fun testActionsMixinWorksWithExistingGetXPageControllerMechanism() {
+        val config = navigatorConfig(PageCapability.BASIC, RepositoryMode.NONE).copy(
+            routeDiMode = RouteDiMode.GETX_ROUTE_BINDING,
+            bindingMode = BindingMode.CREATE,
+        )
+
+        val generator = GetXCodeGenerator()
+        val page = generator.page(config)
+        val mixin = generator.businessMixin(config)
+
+        assertTrue(page.contains("import 'tk_course_actions_mixin.dart';"))
+        assertTrue(page.contains("with CourseActionsMixin<CoursePage>"))
+        assertTrue(page.contains("CourseController get controller => Get.find<CourseController>();"))
+        assertTrue(mixin.contains("CourseController get controller;"))
     }
 
     private fun navigatorConfig(

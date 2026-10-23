@@ -94,6 +94,7 @@ class GetXRouteValidator(private val project: Project) {
 
         val targetDirectory = config.parentDirectory.findChild(config.routeName)
         checkFileConflict(targetDirectory, config.pageFileName, errors)
+        config.businessMixinFileName?.let { checkFileConflict(targetDirectory, it, errors) }
         if (config.controllerMode == ControllerMode.CREATE) {
             checkFileConflict(targetDirectory, config.controllerFileName, errors)
         }
@@ -106,6 +107,7 @@ class GetXRouteValidator(private val project: Project) {
         val generatedClasses = buildList {
             add(config.pageClassName)
             if (config.controllerMode == ControllerMode.CREATE) add(config.controllerClassName)
+            config.businessMixinSpec?.let { add(it.mixinClassName) }
             if (config.repositoryMode == RepositoryMode.CREATE) add(requireNotNull(config.repositoryClassName))
             if (config.routeDiMode == RouteDiMode.GETX_ROUTE_BINDING && config.bindingMode != BindingMode.NONE) {
                 add(config.bindingClassName)
